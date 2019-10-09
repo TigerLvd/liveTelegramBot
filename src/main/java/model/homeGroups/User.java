@@ -1,4 +1,4 @@
-package model;
+package model.homeGroups;
 
 import org.springframework.data.annotation.Id;
 

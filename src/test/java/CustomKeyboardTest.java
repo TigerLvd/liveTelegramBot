@@ -1,4 +1,4 @@
-import model.CustomKeyboardMarkup;
+import model.homeGroups.CustomKeyboardMarkup;
 import org.junit.Ignore;
 import org.junit.Test;
 

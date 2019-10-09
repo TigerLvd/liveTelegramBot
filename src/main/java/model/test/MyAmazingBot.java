@@ -1,5 +1,7 @@
-package model;
+package model.test;
 
+import model.homeGroups.CustomKeyboardMarkup;
+import model.homeGroups.User;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;

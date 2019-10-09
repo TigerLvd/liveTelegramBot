@@ -1,4 +1,4 @@
-package model;
+package model.liveInfo;
 
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;

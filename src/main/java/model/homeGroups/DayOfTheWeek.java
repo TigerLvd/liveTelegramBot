@@ -1,4 +1,4 @@
-package model;
+package model.homeGroups;
 
 public enum DayOfTheWeek {
     MO ("Понедельник"),

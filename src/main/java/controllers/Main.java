@@ -1,7 +1,7 @@
 package controllers;
 
-import model.LiveInfoBot;
-import model.MyAmazingBot;
+import model.liveInfo.LiveInfoBot;
+import model.test.MyAmazingBot;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.ApiContext;

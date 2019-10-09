@@ -1,4 +1,4 @@
-package model;
+package model.homeGroups;
 
 public class Helper extends User {
 
