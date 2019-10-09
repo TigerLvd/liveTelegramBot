@@ -47,9 +47,9 @@ public class LiveInfoBot extends TelegramLongPollingBot {
             if (callData == null || callData.isEmpty()) {
                 return;
             }
-            if (callData.equals("time")) {
+            if (callData.equals("timeTable")) {
                 editTimeTable(chatId, messageId);
-            } else if (callData.equals("messagers")) {
+            } else if (callData.equals("socialNetwork")) {
                 editSocialNetwork(chatId, messageId);
             } else if (callData.equals("conf")) {
                 editConfInfo(chatId, messageId);
@@ -171,8 +171,8 @@ public class LiveInfoBot extends TelegramLongPollingBot {
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<List<InlineKeyboardButton>>();
         List<InlineKeyboardButton> rowInline = new ArrayList<InlineKeyboardButton>();
-        rowInline.add(new InlineKeyboardButton().setText("Рассписание").setCallbackData("time"));
-        rowInline.add(new InlineKeyboardButton().setText("Соц.сети").setCallbackData("messagers"));
+        rowInline.add(new InlineKeyboardButton().setText("Рассписание").setCallbackData("timeTable"));
+        rowInline.add(new InlineKeyboardButton().setText("Соц.сети").setCallbackData("socialNetwork"));
         rowInline.add(new InlineKeyboardButton().setText("Зимняя конференция live").setCallbackData("conf"));
         rowsInline.add(rowInline);
         markupInline.setKeyboard(rowsInline);
@@ -186,6 +186,10 @@ public class LiveInfoBot extends TelegramLongPollingBot {
         rowInline.add(new InlineKeyboardButton().setText("Даты").setCallbackData("confDays"));
         rowInline.add(new InlineKeyboardButton().setText("Регистрация").setCallbackData("registration"));
         rowInline.add(new InlineKeyboardButton().setText("Расселение").setCallbackData("home"));
+        rowsInline.add(rowInline);
+
+        rowInline = new ArrayList<InlineKeyboardButton>();
+        rowInline.add(new InlineKeyboardButton().setText("в главное меню").setCallbackData("menu"));
         rowsInline.add(rowInline);
         markupInline.setKeyboard(rowsInline);
         return markupInline;
@@ -202,6 +206,10 @@ public class LiveInfoBot extends TelegramLongPollingBot {
 
         rowInline = new ArrayList<InlineKeyboardButton>();
         rowInline.add(new InlineKeyboardButton().setText("youtube").setCallbackData("youtube"));
+        rowsInline.add(rowInline);
+
+        rowInline = new ArrayList<InlineKeyboardButton>();
+        rowInline.add(new InlineKeyboardButton().setText("в главное меню").setCallbackData("menu"));
         rowsInline.add(rowInline);
         markupInline.setKeyboard(rowsInline);
         return markupInline;
@@ -225,6 +233,10 @@ public class LiveInfoBot extends TelegramLongPollingBot {
         rowInline.add(new InlineKeyboardButton().setText("Утренняя молитва").setCallbackData("morningPrayer"));
         rowInline.add(new InlineKeyboardButton().setText("Ночная молитва").setCallbackData("nightPrayer"));
         rowInline.add(new InlineKeyboardButton().setText("Домашние группы").setCallbackData("homeGroups"));
+        rowsInline.add(rowInline);
+
+        rowInline = new ArrayList<InlineKeyboardButton>();
+        rowInline.add(new InlineKeyboardButton().setText("в главное меню").setCallbackData("menu"));
         rowsInline.add(rowInline);
         markupInline.setKeyboard(rowsInline);
         return markupInline;
