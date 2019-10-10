@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class LiveInfoBot extends TelegramLongPollingBot {
@@ -27,57 +28,61 @@ public class LiveInfoBot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             Long chatId = update.getMessage().getChatId();
             String text = update.getMessage().getText().toLowerCase();
+
             if (null == text || text.isEmpty()) {
                 return;
             }
 
-            if (text.equals("расписание")) {
-                sendTimeTable(chatId);
-            } else if (text.equals("соц.сети")) {
-                sendSocialNetwork(chatId);
-            } else if (text.equals("зимняя конференция live")) {
-                sendConfInfo(chatId);
+            Block block = Block.getByCode(text);
+            if (null != block) {
+                sendNewMessage(chatId, block);
             } else {
-                sendMenu(chatId);
+                Section section = Section.getByCode(text);
+                if (null != section) {
+                    sendNewMessage(chatId, section);
+                } else {
+                    Field field = Field.getByCode(text);
+                    if (null != field) {
+                        sendNewMessage(chatId, field);
+                    } else {
+                        sendNewMessage(chatId, Block.GENERAL_MENU);
+                    }
+                }
             }
         } else if (update.hasCallbackQuery()) {
             String callData = update.getCallbackQuery().getData();
             Long chatId = update.getCallbackQuery().getMessage().getChatId();
             Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+
             if (callData == null || callData.isEmpty()) {
                 return;
             }
-            if (callData.equals("timeTable")) {
-                editTimeTable(chatId, messageId);
-            } else if (callData.equals("socialNetwork")) {
-                editSocialNetwork(chatId, messageId);
-            } else if (callData.equals("conf")) {
-                editConfInfo(chatId, messageId);
+
+            Block block = Block.getByCode(callData);
+            if (null != block) {
+                editCurrentMessage(chatId, messageId, block);
             } else {
-                editMenu(chatId, messageId);
+                Section section = Section.getByCode(callData);
+                if (null != section) {
+                    editCurrentMessage(chatId, messageId, section);
+                } else {
+                    Field field = Field.getByCode(callData);
+                    if (null != field) {
+                        editCurrentMessage(chatId, messageId, field);
+                    } else {
+                        editCurrentMessage(chatId, messageId, Block.GENERAL_MENU);
+                    }
+                }
             }
         }
     }
 
-    private void sendMenu(Long chatId) {
-        SendMessage message = new SendMessage()
-                .setChatId(chatId)
-                .setText("Главное меню");
-        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkupGeneralMenu();
-        message.setReplyMarkup(markupInline);
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void editMenu(Long chatId, Integer messageId) {
+    private void editCurrentMessage(Long chatId, Integer messageId, Block block) {
         EditMessageText message = new EditMessageText()
                 .setChatId(chatId)
                 .setMessageId(messageId)
-                .setText("Главное меню");
-        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkupGeneralMenu();
+                .setText(block.getName());
+        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkup(block);
         message.setReplyMarkup(markupInline);
         try {
             execute(message);
@@ -86,25 +91,12 @@ public class LiveInfoBot extends TelegramLongPollingBot {
         }
     }
 
-    private void sendConfInfo(Long chatId) {
-        SendMessage message = new SendMessage()
-                .setChatId(chatId)
-                .setText("Зимняя конференция live");
-        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkupConfInfo();
-        message.setReplyMarkup(markupInline);
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void editConfInfo(Long chatId, Integer messageId) {
+    private void editCurrentMessage(Long chatId, Integer messageId, Section section) {
         EditMessageText message = new EditMessageText()
                 .setChatId(chatId)
                 .setMessageId(messageId)
-                .setText("Зимняя конференция live");
-        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkupConfInfo();
+                .setText(section.getName());
+        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkup(section);
         message.setReplyMarkup(markupInline);
         try {
             execute(message);
@@ -113,25 +105,12 @@ public class LiveInfoBot extends TelegramLongPollingBot {
         }
     }
 
-    private void sendSocialNetwork(Long chatId) {
-        SendMessage message = new SendMessage()
-                .setChatId(chatId)
-                .setText("Соц.сети");
-        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkupSocialNetwork();
-        message.setReplyMarkup(markupInline);
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void editSocialNetwork(Long chatId, Integer messageId) {
+    private void editCurrentMessage(Long chatId, Integer messageId, Field field) {
         EditMessageText message = new EditMessageText()
                 .setChatId(chatId)
                 .setMessageId(messageId)
-                .setText("Соц.сети");
-        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkupSocialNetwork();
+                .setText(field.getName());
+        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkup(field);
         message.setReplyMarkup(markupInline);
         try {
             execute(message);
@@ -140,11 +119,11 @@ public class LiveInfoBot extends TelegramLongPollingBot {
         }
     }
 
-    private void sendTimeTable(Long chatId) {
+    private void sendNewMessage(Long chatId, Field field) {
         SendMessage message = new SendMessage()
                 .setChatId(chatId)
-                .setText("Рассписание");
-        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkupTimeTable();
+                .setText(field.getName());
+        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkup(field);
         message.setReplyMarkup(markupInline);
         try {
             execute(message);
@@ -153,12 +132,11 @@ public class LiveInfoBot extends TelegramLongPollingBot {
         }
     }
 
-    private void editTimeTable(Long chatId, Integer messageId) {
-        EditMessageText message = new EditMessageText()
+    private void sendNewMessage(Long chatId, Section section) {
+        SendMessage message = new SendMessage()
                 .setChatId(chatId)
-                .setMessageId(messageId)
-                .setText("Рассписание");
-        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkupTimeTable();
+                .setText(section.getName());
+        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkup(section);
         message.setReplyMarkup(markupInline);
         try {
             execute(message);
@@ -167,77 +145,84 @@ public class LiveInfoBot extends TelegramLongPollingBot {
         }
     }
 
-    private InlineKeyboardMarkup getInlineKeyboardMarkupGeneralMenu() {
+    private void sendNewMessage(Long chatId, Block block) {
+        SendMessage message = new SendMessage()
+                .setChatId(chatId)
+                .setText(block.getName());
+        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkup(block);
+        message.setReplyMarkup(markupInline);
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private InlineKeyboardMarkup getInlineKeyboardMarkup(Section section) {
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<List<InlineKeyboardButton>>();
         List<InlineKeyboardButton> rowInline = new ArrayList<InlineKeyboardButton>();
-        rowInline.add(new InlineKeyboardButton().setText("Рассписание").setCallbackData("timeTable"));
-        rowInline.add(new InlineKeyboardButton().setText("Соц.сети").setCallbackData("socialNetwork"));
-        rowInline.add(new InlineKeyboardButton().setText("Зимняя конференция live").setCallbackData("conf"));
+
+        Iterator<Field> fieldIterator = section.getFields().iterator();
+        int i = 0;
+        while (fieldIterator.hasNext()) {
+            Field field = fieldIterator.next();
+            rowInline.add(new InlineKeyboardButton().setText(field.getName()).setCallbackData(field.getCode()));
+            i++;
+            if (i % 3 == 0) {
+                rowsInline.add(rowInline);
+                rowInline = new ArrayList<InlineKeyboardButton>();
+                i = 0;
+            }
+        }
+        if (!rowInline.isEmpty()) {
+            rowsInline.add(rowInline);
+            rowInline = new ArrayList<InlineKeyboardButton>();
+        }
+        Block block = section.getBlock();
+        rowInline.add(new InlineKeyboardButton().setText(block.getName()).setCallbackData(block.getCode()));
         rowsInline.add(rowInline);
+
         markupInline.setKeyboard(rowsInline);
         return markupInline;
     }
 
-    private InlineKeyboardMarkup getInlineKeyboardMarkupConfInfo() {
+    private InlineKeyboardMarkup getInlineKeyboardMarkup(Field field) {
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<List<InlineKeyboardButton>>();
         List<InlineKeyboardButton> rowInline = new ArrayList<InlineKeyboardButton>();
-        rowInline.add(new InlineKeyboardButton().setText("Даты").setCallbackData("confDays"));
-        rowInline.add(new InlineKeyboardButton().setText("Регистрация").setCallbackData("registration"));
-        rowInline.add(new InlineKeyboardButton().setText("Расселение").setCallbackData("home"));
+
+        Section section = field.getSection();
+        Block block = section.getBlock();
+        rowInline.add(new InlineKeyboardButton().setText(section.getName()).setCallbackData(section.getCode()));
+        rowInline.add(new InlineKeyboardButton().setText(block.getName()).setCallbackData(block.getCode()));
         rowsInline.add(rowInline);
 
-        rowInline = new ArrayList<InlineKeyboardButton>();
-        rowInline.add(new InlineKeyboardButton().setText("в главное меню").setCallbackData("menu"));
-        rowsInline.add(rowInline);
         markupInline.setKeyboard(rowsInline);
         return markupInline;
     }
 
-    private InlineKeyboardMarkup getInlineKeyboardMarkupSocialNetwork() {
+    private InlineKeyboardMarkup getInlineKeyboardMarkup(Block block) {
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<List<InlineKeyboardButton>>();
         List<InlineKeyboardButton> rowInline = new ArrayList<InlineKeyboardButton>();
-        rowInline.add(new InlineKeyboardButton().setText("instagram").setCallbackData("instagram"));
-        rowInline.add(new InlineKeyboardButton().setText("vk").setCallbackData("vk"));
-        rowInline.add(new InlineKeyboardButton().setText("telegram").setCallbackData("telegram"));
-        rowsInline.add(rowInline);
 
-        rowInline = new ArrayList<InlineKeyboardButton>();
-        rowInline.add(new InlineKeyboardButton().setText("youtube").setCallbackData("youtube"));
-        rowsInline.add(rowInline);
+        Iterator<Section> sectionIterator = block.getSections().iterator();
+        int i = 0;
+        while (sectionIterator.hasNext()) {
+            Section section = sectionIterator.next();
+            rowInline.add(new InlineKeyboardButton().setText(section.getName()).setCallbackData(section.getCode()));
+            i++;
+            if (i % 3 == 0) {
+                rowsInline.add(rowInline);
+                rowInline = new ArrayList<InlineKeyboardButton>();
+                i = 0;
+            }
+        }
+        if (!rowsInline.isEmpty()) {
+            rowsInline.add(rowInline);
+        }
 
-        rowInline = new ArrayList<InlineKeyboardButton>();
-        rowInline.add(new InlineKeyboardButton().setText("в главное меню").setCallbackData("menu"));
-        rowsInline.add(rowInline);
-        markupInline.setKeyboard(rowsInline);
-        return markupInline;
-    }
-
-    private InlineKeyboardMarkup getInlineKeyboardMarkupTimeTable() {
-        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<List<InlineKeyboardButton>>();
-        List<InlineKeyboardButton> rowInline = new ArrayList<InlineKeyboardButton>();
-        rowInline.add(new InlineKeyboardButton().setText("Субботнее служение").setCallbackData("saturdayService"));
-        rowInline.add(new InlineKeyboardButton().setText("Первое воскресное служение").setCallbackData("firstService"));
-        rowInline.add(new InlineKeyboardButton().setText("Второе воскресное служение").setCallbackData("secondService"));
-        rowsInline.add(rowInline);
-
-        rowInline = new ArrayList<InlineKeyboardButton>();
-        rowInline.add(new InlineKeyboardButton().setText("Препати").setCallbackData("preparety"));
-        rowInline.add(new InlineKeyboardButton().setText("Молодёжное служение").setCallbackData("youthService"));
-        rowInline.add(new InlineKeyboardButton().setText("Автопати").setCallbackData("afterparty"));
-
-        rowInline = new ArrayList<InlineKeyboardButton>();
-        rowInline.add(new InlineKeyboardButton().setText("Утренняя молитва").setCallbackData("morningPrayer"));
-        rowInline.add(new InlineKeyboardButton().setText("Ночная молитва").setCallbackData("nightPrayer"));
-        rowInline.add(new InlineKeyboardButton().setText("Домашние группы").setCallbackData("homeGroups"));
-        rowsInline.add(rowInline);
-
-        rowInline = new ArrayList<InlineKeyboardButton>();
-        rowInline.add(new InlineKeyboardButton().setText("в главное меню").setCallbackData("menu"));
-        rowsInline.add(rowInline);
         markupInline.setKeyboard(rowsInline);
         return markupInline;
     }
