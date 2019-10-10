@@ -14,6 +14,9 @@ import java.util.Iterator;
 import java.util.List;
 
 public class LiveInfoBot extends TelegramLongPollingBot {
+    final int COLUMN_NUMBER = 3;
+    final boolean IS_CHANGE_CURRENT_MESSAGE = false;
+
     private String botToken;
     private String botName;
 
@@ -29,49 +32,61 @@ public class LiveInfoBot extends TelegramLongPollingBot {
             Long chatId = update.getMessage().getChatId();
             String text = update.getMessage().getText().toLowerCase();
 
-            if (null == text || text.isEmpty()) {
-                return;
-            }
-
-            Block block = Block.getByCode(text);
-            if (null != block) {
-                sendNewMessage(chatId, block);
-            } else {
-                Section section = Section.getByCode(text);
-                if (null != section) {
-                    sendNewMessage(chatId, section);
-                } else {
-                    Field field = Field.getByCode(text);
-                    if (null != field) {
-                        sendNewMessage(chatId, field);
-                    } else {
-                        sendNewMessage(chatId, Block.GENERAL_MENU);
-                    }
-                }
-            }
+            sendNewMessage(chatId, text);
         } else if (update.hasCallbackQuery()) {
-            String callData = update.getCallbackQuery().getData();
+            String callbackData = update.getCallbackQuery().getData();
             Long chatId = update.getCallbackQuery().getMessage().getChatId();
             Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
 
-            if (callData == null || callData.isEmpty()) {
-                return;
-            }
-
-            Block block = Block.getByCode(callData);
-            if (null != block) {
-                editCurrentMessage(chatId, messageId, block);
+            if (IS_CHANGE_CURRENT_MESSAGE) {
+                editCurrentMessage(callbackData, chatId, messageId);
             } else {
-                Section section = Section.getByCode(callData);
-                if (null != section) {
-                    editCurrentMessage(chatId, messageId, section);
+                sendNewMessage(chatId, callbackData);
+            }
+        }
+    }
+
+    private void editCurrentMessage(String callData, Long chatId, Integer messageId) {
+        if (callData == null || callData.isEmpty()) {
+            return;
+        }
+
+        Block block = Block.getByCode(callData);
+        if (null != block) {
+            editCurrentMessage(chatId, messageId, block);
+        } else {
+            Section section = Section.getByCode(callData);
+            if (null != section) {
+                editCurrentMessage(chatId, messageId, section);
+            } else {
+                Field field = Field.getByCode(callData);
+                if (null != field) {
+                    editCurrentMessage(chatId, messageId, field);
                 } else {
-                    Field field = Field.getByCode(callData);
-                    if (null != field) {
-                        editCurrentMessage(chatId, messageId, field);
-                    } else {
-                        editCurrentMessage(chatId, messageId, Block.GENERAL_MENU);
-                    }
+                    editCurrentMessage(chatId, messageId, Block.GENERAL_MENU);
+                }
+            }
+        }
+    }
+
+    private void sendNewMessage(Long chatId, String text) {
+        if (null == text || text.isEmpty()) {
+            return;
+        }
+
+        Block block = Block.getByCode(text);
+        if (null != block) {
+            sendNewMessage(chatId, block);
+        } else {
+            Section section = Section.getByCode(text);
+            if (null != section) {
+                sendNewMessage(chatId, section);
+            } else {
+                Field field = Field.getByCode(text);
+                if (null != field) {
+                    sendNewMessage(chatId, field);
+                } else {
+                    sendNewMessage(chatId, Block.GENERAL_MENU);
                 }
             }
         }
@@ -169,7 +184,7 @@ public class LiveInfoBot extends TelegramLongPollingBot {
             Field field = fieldIterator.next();
             rowInline.add(new InlineKeyboardButton().setText(field.getName()).setCallbackData(field.getCode()));
             i++;
-            if (i % 3 == 0) {
+            if (i % COLUMN_NUMBER == 0) {
                 rowsInline.add(rowInline);
                 rowInline = new ArrayList<InlineKeyboardButton>();
                 i = 0;
@@ -213,7 +228,7 @@ public class LiveInfoBot extends TelegramLongPollingBot {
             Section section = sectionIterator.next();
             rowInline.add(new InlineKeyboardButton().setText(section.getName()).setCallbackData(section.getCode()));
             i++;
-            if (i % 3 == 0) {
+            if (i % COLUMN_NUMBER == 0) {
                 rowsInline.add(rowInline);
                 rowInline = new ArrayList<InlineKeyboardButton>();
                 i = 0;
