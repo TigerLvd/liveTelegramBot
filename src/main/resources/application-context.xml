@@ -1,41 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans.xsd">
+       http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:property-placeholder location="/WEB-INF/spring.properties" />
+
+    <tx:annotation-driven transaction-manager="transactionManager" />
 
     <bean id="sessionFactory"
           class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
-        <property name="dataSource"
-                  ref="dataSource"/>
-<!--        <property name="packagesToScan"-->
-<!--                  value="com.baeldung.hibernate.bootstrap.model"/>-->
-        <property name="hibernateProperties">
-            <props>
-                <prop key="hibernate.hbm2ddl.auto">
-                    create-drop
-                </prop>
-                <prop key="hibernate.dialect">
-                    org.hibernate.dialect.H2Dialect
-                </prop>
-            </props>
+        <property name="dataSource" ref="dataSource"/>
+        <property name="configLocation" value="classpath:hibernate.cfg.xml" />
+        <property name="packagesToScan">
+            <list>
+                <value>model.homeGroups.db</value>
+                <value>model.homeGroups.dao</value>
+                <value>model.homeGroups.service</value>
+            </list>
         </property>
     </bean>
 
-    <bean id="dataSource"
-          class="org.apache.tomcat.dbcp.dbcp2.BasicDataSource">
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="${jdbc.driverClassName}" />
         <property name="url" value="${jdbc.url}" />
-        <property name="username" value="${jdbc.user}" />
-        <property name="password" value="${jdbc.pass}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+        <property name="schema" value="${jdbc.schema}" />
     </bean>
 
-    <bean id="transactionManager"
-          class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+    <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
         <property name="sessionFactory" ref="sessionFactory" />
+        <property name="dataSource" ref="dataSource"/>
     </bean>
 
     <bean id="persistenceExceptionTranslationPostProcessor"
           class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/>
 
+    <bean id="StatisticsInfo" class="model.homeGroups.db.StatisticsInfo" />
+
+    <bean id="StatisticsInfoService" class="model.homeGroups.service.StatisticsInfoServiceImpl">
+        <property name="dao" ref="StatisticsInfoDaoService"/>
+    </bean>
+
+    <bean id="StatisticsInfoDaoService" class="model.homeGroups.dao.StatisticsInfoDaoServiceImpl" parent="AbstractHibernateDao">
+        <property name="persistentClass" value="model.homeGroups.db.StatisticsInfo"/>
+    </bean>
+
+    <bean id="AbstractHibernateDao" class="model.homeGroups.dao.AbstractHibernateDao"
+          abstract="true">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
 </beans>

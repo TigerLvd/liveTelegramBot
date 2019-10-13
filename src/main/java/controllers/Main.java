@@ -1,7 +1,12 @@
 package controllers;
 
+import model.homeGroups.db.StatisticsInfo;
+import model.homeGroups.service.StatisticsInfoService;
+import model.homeGroups.service.StatisticsInfoServiceImpl;
 import model.liveInfo.LiveInfoBot;
 import model.test.MyAmazingBot;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.ApiContext;
@@ -43,6 +48,10 @@ public class Main {
             e.printStackTrace();
         }
         System.out.println("qe");
+//        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("application-context.xml");
+//        StatisticsInfoService service = (StatisticsInfoService) applicationContext.getBean("StatisticsInfoService");
+//        StatisticsInfo info = service.findById(1L);
+//        System.out.println(info.toString());
     }
 
     private static void init() {
