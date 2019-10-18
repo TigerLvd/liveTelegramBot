@@ -9,9 +9,17 @@ public enum DayOfTheWeek {
     SA	("Суббота"),
     SU	("Воскресенье");
 
-    final String title;
+    private String title;
 
     DayOfTheWeek(String name) {
         title = name;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

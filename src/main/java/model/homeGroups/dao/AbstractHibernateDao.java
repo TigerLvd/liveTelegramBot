@@ -4,6 +4,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
@@ -81,6 +82,17 @@ public abstract class AbstractHibernateDao<T> implements Dao<T> {
 
         Criteria criteria = getSession().createCriteria(getPersistentClass());
         criteria.add(Restrictions.in("id", ids));
+
+        return criteria.list();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<T> findAll(String... property) {
+        Criteria criteria = getSession().createCriteria(getPersistentClass());
+        for (String prop : property) {
+            criteria.createAlias(prop, prop, JoinType.LEFT_OUTER_JOIN);
+        }
 
         return criteria.list();
     }

@@ -38,15 +38,38 @@
     <bean id="persistenceExceptionTranslationPostProcessor"
           class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/>
 
-    <bean id="StatisticsInfo" class="model.homeGroups.db.StatisticsInfo" />
+    <bean id="StatInfo" class="model.homeGroups.db.StatInfo" />
 
-    <bean id="StatisticsInfoService" class="model.homeGroups.service.StatisticsInfoServiceImpl">
-        <property name="dao" ref="StatisticsInfoDaoService"/>
+    <bean id="User" class="model.homeGroups.db.User" />
+
+    <bean id="HomeGroup" class="model.homeGroups.db.HomeGroup" />
+
+    <bean id="StatInfoService" class="model.homeGroups.service.StatInfoServiceImpl">
+        <property name="dao" ref="StatInfoDaoService"/>
     </bean>
 
-    <bean id="StatisticsInfoDaoService" class="model.homeGroups.dao.StatisticsInfoDaoServiceImpl" parent="AbstractHibernateDao">
-        <property name="persistentClass" value="model.homeGroups.db.StatisticsInfo"/>
+    <bean id="UserService" class="model.homeGroups.service.UserServiceImpl">
+        <property name="dao" ref="UserDaoService"/>
     </bean>
+
+    <bean id="HomeGroupService" class="model.homeGroups.service.HomeGroupServiceImpl">
+        <property name="dao" ref="HomeGroupDaoService"/>
+    </bean>
+
+    <bean id="StatInfoDaoService" class="model.homeGroups.dao.StatInfoDaoServiceImpl" parent="AbstractHibernateDao">
+        <property name="persistentClass" value="model.homeGroups.db.StatInfo"/>
+    </bean>
+
+    <bean id="UserDaoService" class="model.homeGroups.dao.UserDaoServiceImpl" parent="AbstractHibernateDao">
+        <property name="persistentClass" value="model.homeGroups.db.User"/>
+    </bean>
+
+    <bean id="HomeGroupDaoService" class="model.homeGroups.dao.HomeGroupDaoServiceImpl" parent="AbstractHibernateDao">
+        <property name="persistentClass" value="model.homeGroups.db.HomeGroup"/>
+    </bean>
+
+<!--    <bean id="HomeGroupBot" class="model.homeGroups.HomeGroupBot">-->
+<!--    </bean>-->
 
     <bean id="AbstractHibernateDao" class="model.homeGroups.dao.AbstractHibernateDao"
           abstract="true">

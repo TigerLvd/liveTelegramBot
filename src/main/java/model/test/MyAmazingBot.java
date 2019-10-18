@@ -1,7 +1,7 @@
 package model.test;
 
 import model.homeGroups.CustomKeyboardMarkup;
-import model.homeGroups.User;
+import model.homeGroups.db.User;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -41,7 +41,11 @@ public class MyAmazingBot extends TelegramLongPollingBot {
                 String userName = update.getMessage().getChat().getUserName();
                 Long userId = update.getMessage().getChat().getId();
 
-                User user = new User(firstName, lastName, userName, userId);
+                User user = new User();
+                user.setFirstName(firstName);
+                user.setLastName(lastName);
+                user.setNickName(userName);
+                user.setTelegramUserId(userId);
                 SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
                         .setChatId(chatId)
                         .setText(user.toString()); /*update.getMessage().getText()*/

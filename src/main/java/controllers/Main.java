@@ -1,12 +1,5 @@
 package controllers;
 
-import model.homeGroups.db.StatisticsInfo;
-import model.homeGroups.service.StatisticsInfoService;
-import model.homeGroups.service.StatisticsInfoServiceImpl;
-import model.liveInfo.LiveInfoBot;
-import model.test.MyAmazingBot;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.ApiContext;
@@ -17,6 +10,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import model.homeGroups.HomeGroupBot;
+
 public class Main {
     private static String BOT_NAME;
     private static String BOT_TOKEN;
@@ -25,6 +20,8 @@ public class Main {
 
     private static String PROXY_HOST;
     private static Integer PROXY_PORT;
+
+    private static Long ADMIN_ID;
 
     public static void main(String[] args) {
 
@@ -39,19 +36,15 @@ public class Main {
             botOptions.setProxyPort(PROXY_PORT);
             botOptions.setProxyType(DefaultBotOptions.ProxyType.SOCKS5);
 
-            MyAmazingBot bot = new MyAmazingBot(BOT_TOKEN, BOT_NAME, botOptions);
-            LiveInfoBot bot2 = new LiveInfoBot(BOT_TOKEN2, BOT_NAME2, botOptions);
+            HomeGroupBot bot = new HomeGroupBot(BOT_TOKEN, BOT_NAME, ADMIN_ID, botOptions);
+//            LiveInfoBot bot2 = new LiveInfoBot(BOT_TOKEN2, BOT_NAME2, botOptions);
 
             botsApi.registerBot(bot);
-            botsApi.registerBot(bot2);
+//            botsApi.registerBot(bot2);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
         System.out.println("qe");
-//        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("application-context.xml");
-//        StatisticsInfoService service = (StatisticsInfoService) applicationContext.getBean("StatisticsInfoService");
-//        StatisticsInfo info = service.findById(1L);
-//        System.out.println(info.toString());
     }
 
     private static void init() {
@@ -69,6 +62,8 @@ public class Main {
 
             PROXY_HOST = property.getProperty("proxy_host");
             PROXY_PORT = new Integer(property.getProperty("proxy_port"));
+
+            ADMIN_ID = new Long(property.getProperty("admin_id"));
 
             System.out.println("BOT_NAME: " + BOT_NAME
                     + ", BOT_NAME2: " + BOT_NAME2

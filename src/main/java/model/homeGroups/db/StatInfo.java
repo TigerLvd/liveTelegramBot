@@ -1,12 +1,17 @@
 package model.homeGroups.db;
 
-import javax.persistence.*;
 import java.sql.Date;
 import java.sql.Timestamp;
 
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 @Entity
-@Table(name = "statistics_info", schema = "live_ntc")
-public class StatisticsInfo {
+@Table(name = "STAT_INFO", schema = "live_ntc")
+public class StatInfo {
     private Long id;
     private Date eventDate;
     private int saverId;
@@ -15,7 +20,7 @@ public class StatisticsInfo {
     private String comment;
 
     @Id
-    @Column(name = "id")
+    @Column(name = "ID")
     public Long getId() {
         return id;
     }
@@ -35,7 +40,7 @@ public class StatisticsInfo {
     }
 
     @Basic
-    @Column(name = "saver_Id")
+    @Column(name = "SAVER_ID")
     public int getSaverId() {
         return saverId;
     }
@@ -45,7 +50,7 @@ public class StatisticsInfo {
     }
 
     @Basic
-    @Column(name = "saveDate")
+    @Column(name = "SAVE_DATE")
     public Timestamp getSaveDate() {
         return saveDate;
     }
@@ -55,7 +60,7 @@ public class StatisticsInfo {
     }
 
     @Basic
-    @Column(name = "count")
+    @Column(name = "COUNT")
     public int getCount() {
         return count;
     }
@@ -79,7 +84,7 @@ public class StatisticsInfo {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        StatisticsInfo that = (StatisticsInfo) o;
+        StatInfo that = (StatInfo) o;
 
         if (id != that.id) return false;
         if (saverId != that.saverId) return false;

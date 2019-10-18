@@ -21,4 +21,6 @@ public interface Dao<T>{
     T findById(Long id);
 
     List<T> findByIds(Collection<Long> ids);
+
+    List<T> findAll(String... property);
 }
