@@ -1,12 +1,15 @@
 package model.homeGroups.db;
 
 import java.sql.Time;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -31,11 +34,16 @@ public class HomeGroup {
 
     private Time time = new Time(19, 0, 0);
 
+    private String comment;
+
+    private Date startDate;
+
     public HomeGroup() {
     }
 
     @Id
     @Column(name = "ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long getId() {
         return id;
     }
@@ -89,6 +97,24 @@ public class HomeGroup {
 
     public void setTime(Time time) {
         this.time = time;
+    }
+
+    @Column(name = "COMMENT")
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    @Column(name = "START_DATE")
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
     @Override

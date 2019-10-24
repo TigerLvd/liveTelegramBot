@@ -17,4 +17,6 @@ public interface StatInfoService {
     List<StatInfo> findByIds(Collection<Long> ids);
 
     List<StatInfo> findAll(String... properties);
+
+    List<StatInfo> findAllByHomeGroupId(Long id);
 }

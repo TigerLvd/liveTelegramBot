@@ -11,12 +11,21 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import model.homeGroups.db.HomeGroup;
+import model.homeGroups.db.StatInfo;
 import model.homeGroups.db.User;
 import model.homeGroups.service.HomeGroupService;
+import model.homeGroups.service.StatInfoService;
 import model.homeGroups.service.UserService;
 
 @EnableScheduling
@@ -28,6 +37,7 @@ public class HomeGroupBot extends TelegramLongPollingBot {
 
     UserService userService;
     HomeGroupService homeGroupService;
+    StatInfoService statInfoService;
 
     public HomeGroupBot(String botToken, String botName, Long adminId, DefaultBotOptions options) {
         super(options);
@@ -39,6 +49,7 @@ public class HomeGroupBot extends TelegramLongPollingBot {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("application-context.xml");
         userService = (UserService) applicationContext.getBean("UserService");
         homeGroupService = (HomeGroupService) applicationContext.getBean("HomeGroupService");
+        statInfoService = (StatInfoService) applicationContext.getBean("StatInfoService");
     }
 
     @Override
@@ -87,29 +98,86 @@ public class HomeGroupBot extends TelegramLongPollingBot {
             }
 
             if (text.startsWith("Статистика: ")) {
-                String[] str = text.split(" ");
+                String[] str;
                 Date date;
                 try {
-                    date = Date.valueOf(str[1]);
+                    str = text.split(" ");
+                    String[] sbStr = str[1].split("\\.");
+
+                    date = getDate(sbStr[0], sbStr[1], sbStr[2]);
                 } catch (Exception e) {
                     send(chatId, "Не верный формат! Ввести информацию в формате: Статистика: ДД.ММ.ГГ количество. Например:\nСтатистика: 01.02.19 987", keyboardMarkup);
                     return;
                 }
-                Long count;
+                Integer count;
                 try {
-                    count = new Long(str[2]);
+                    count = new Integer(str[2]);
                 } catch (Exception e) {
                     send(chatId, "Не верный формат! Ввести информацию в формате: Статистика: дд.мм.гг КОЛИЧЕСТВО. Например:\nСтатистика: 01.02.19 987", keyboardMarkup);
                     return;
                 }
-                send(chatId, "Получено: " + count + " за " + date, keyboardMarkup);
-                //todo доделать
+                StatInfo statInfo = new StatInfo();
+                statInfo.setCount(count);
+                statInfo.setEventDate(date);
+                statInfo.setSaveDate(new Timestamp(new Date().getTime()));
+                statInfo.setSaverId(chatId.intValue());
+                statInfo.setComment(user.getComment());
+                statInfo.setHomeGroup(user.getHomeGroup());
+                statInfoService.saveOrUpdate(statInfo);
+
+                send(chatId, "Получено: " + count + " за " + getStringOfDate(statInfo.getEventDate()), keyboardMarkup);
                 return;
             }
 
             if ("Не заполнено".equals(text)) {
-                //todo доделать
-                send(chatId, "Раздел в разработке", keyboardMarkup);
+                Calendar start;
+                if (user.getHomeGroup().getStartDate() != null) {
+                    start = new GregorianCalendar();
+                    start.setTime(user.getHomeGroup().getStartDate());
+                } else {
+                    start = new GregorianCalendar();
+                }
+
+                Map<Date, StatInfo> statInfoByFirstDayOfWeek = new HashMap<Date, StatInfo>();
+                Set<Date> lostWeeks = new HashSet<Date>();
+                List<StatInfo> allStatInfos = statInfoService.findAllByHomeGroupId(user.getHomeGroup().getId());
+                if (null != allStatInfos) {
+                    for (StatInfo statInfo : allStatInfos) {
+                        Date time = getFirstDayOfWeek(statInfo.getEventDate());
+                        statInfoByFirstDayOfWeek.put(time, statInfo);
+                    }
+                }
+                start.setTime(getFirstDayOfWeek(start.getTime()));
+                while (start.before(new GregorianCalendar())) {
+                    if (statInfoByFirstDayOfWeek.get(start.getTime()) == null) {
+                        lostWeeks.add(start.getTime());
+                    }
+                    start.add(Calendar.DAY_OF_MONTH, 7);
+                }
+
+                if (lostWeeks.isEmpty()) {
+                    send(chatId, "Все данные введены, задолженностей нет", keyboardMarkup);
+                } else {
+                    StringBuilder stringBuilder = new StringBuilder("Нет информации за следующие недели:\n");
+                    int i = 1;
+                    for (Date monday : lostWeeks) {
+                        stringBuilder.append(i);
+                        stringBuilder.append(") ");
+                        stringBuilder.append(getStringOfDate(monday));
+                        stringBuilder.append("-");
+
+                        Calendar calendar = new GregorianCalendar();
+                        calendar.setTime(monday);
+                        calendar.add(Calendar.DAY_OF_MONTH, 6);
+                        stringBuilder.append(getStringOfDate(calendar.getTime()));
+                        stringBuilder.append("\n");
+
+                        i++;
+                    }
+
+                    send(chatId, stringBuilder.toString(), keyboardMarkup);
+                }
+
                 return;
             }
 
@@ -126,20 +194,26 @@ public class HomeGroupBot extends TelegramLongPollingBot {
                     int i = 1;
                     for (HomeGroup group : groups) {
                         groupsInfos.append(i++);
-                        groupsInfos.append(") ");
-                        groupsInfos.append("адрес: ");
+                        groupsInfos.append(")");
+                        if (adminId.equals(chatId)) {
+                            groupsInfos.append(" лидер: ");
+                            groupsInfos.append(group.getComment());
+                        }
+                        groupsInfos.append(", адрес: ");
                         groupsInfos.append(group.getAddress());
-                        groupsInfos.append(", номер лидера ячейки: ");
-                        groupsInfos.append(formatPhoneNumber(group.getLiederPhoneNumber()));
+                        if (null != group.getLiederPhoneNumber()) {
+                            groupsInfos.append(", номер лидера ячейки: ");
+                            groupsInfos.append(formatPhoneNumber(group.getLiederPhoneNumber()));
+                        }
                         if (null != group.getLieder()) {
-                            groupsInfos.append(", tel: @");
+                            groupsInfos.append(", telegram: @");
                             groupsInfos.append(group.getLieder().getNickName());
                         }
-                        groupsInfos.append(", ячейка обычно проходит в ");
+                        groupsInfos.append(", время: ");
                         groupsInfos.append(group.getDayOfTheWeek().getTitle());
                         groupsInfos.append(" в ");
                         groupsInfos.append(group.getTime());
-                        groupsInfos.append("\n");
+                        groupsInfos.append("\n\n");
                     }
                 }
                 if (groupsInfos.length() == 0) {
@@ -169,6 +243,36 @@ public class HomeGroupBot extends TelegramLongPollingBot {
 
             send(chatId, "Привет, это бот для ввод инфорации о домашних группах.", keyboardMarkup);
         }
+    }
+
+    private Date getFirstDayOfWeek(Date date) {
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        if (dayOfWeek == 0) {
+            dayOfWeek = 7;
+        } else {
+            dayOfWeek--;
+        }
+        calendar.add(Calendar.DAY_OF_MONTH, dayOfWeek * (-1) + 1); // получили понедельник
+        return calendar.getTime();
+    }
+
+    private Date getDate(String dayString, String mounthString, String yearString) {
+        Date date;
+        Integer day = new Integer(dayString);
+        Integer mounth = new Integer(mounthString) - 1;
+        int year = yearString.length() == 4 ? new Integer(yearString) : new Integer(yearString) + 2000;
+
+        Calendar calendar = new GregorianCalendar(year, mounth , day);
+        date = calendar.getTime();
+        return date;
+    }
+
+    private String getStringOfDate(Date date) {
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        return calendar.get(Calendar.DAY_OF_MONTH) + "." + (calendar.get(Calendar.MONTH) + 1) + "." + calendar.get(Calendar.YEAR);
     }
 
     private String formatPhoneNumber(String str) {

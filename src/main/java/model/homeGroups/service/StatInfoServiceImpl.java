@@ -60,4 +60,10 @@ public class StatInfoServiceImpl implements StatInfoService {
             return getDao().findAll();
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<StatInfo> findAllByHomeGroupId(Long id) {
+        return getDao().findAllByHomeGroupId(id);
+    }
 }

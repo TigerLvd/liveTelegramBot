@@ -1,12 +1,12 @@
 package model.homeGroups;
 
 public enum DayOfTheWeek {
-    MO ("Понедельник"),
+    MD("Понедельник"),
     TU ("Вторник"),
     WE ("Среда"),
     TH	("Четверг"),
     FR	("Пятница"),
-    SA	("Суббота"),
+    ST	("Суббота"),
     SU	("Воскресенье");
 
     private String title;

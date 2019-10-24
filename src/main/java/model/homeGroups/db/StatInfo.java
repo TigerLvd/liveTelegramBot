@@ -1,12 +1,17 @@
 package model.homeGroups.db;
 
-import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.Date;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -16,11 +21,13 @@ public class StatInfo {
     private Date eventDate;
     private int saverId;
     private Timestamp saveDate;
+    private HomeGroup homeGroup;
     private int count;
     private String comment;
 
     @Id
     @Column(name = "ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long getId() {
         return id;
     }
@@ -77,6 +84,16 @@ public class StatInfo {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "HOME_GROUP_ID")
+    public HomeGroup getHomeGroup() {
+        return homeGroup;
+    }
+
+    public void setHomeGroup(HomeGroup homeGroup) {
+        this.homeGroup = homeGroup;
     }
 
     @Override
