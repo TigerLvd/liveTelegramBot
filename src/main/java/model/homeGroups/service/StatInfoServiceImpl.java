@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import model.homeGroups.dao.StatInfoDaoService;
@@ -65,5 +66,11 @@ public class StatInfoServiceImpl implements StatInfoService {
     @Transactional(readOnly = true)
     public List<StatInfo> findAllByHomeGroupId(Long id) {
         return getDao().findAllByHomeGroupId(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public StatInfo findByDateAndHomeGroupId(Date date, Long id) {
+        return getDao().findByDateAndHomeGroupId(date, id);
     }
 }

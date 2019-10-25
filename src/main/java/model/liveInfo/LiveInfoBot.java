@@ -74,6 +74,8 @@ public class LiveInfoBot extends TelegramLongPollingBot {
             return;
         }
 
+        sendStartTestMessage(chatId, text);
+
         Block block = Block.getByCode(text);
         if (null != block) {
             sendNewMessage(chatId, block);
@@ -88,6 +90,19 @@ public class LiveInfoBot extends TelegramLongPollingBot {
                 } else {
                     sendNewMessage(chatId, Block.GENERAL_MENU);
                 }
+            }
+        }
+    }
+
+    private void sendStartTestMessage(Long chatId, String text) {
+        if (text.equals("/start")) {
+            SendMessage message = new SendMessage()
+                    .setChatId(chatId)
+                    .setText("Привет! Это чат бот и он пока на этапе тестирования!");
+            try {
+                execute(message);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
             }
         }
     }

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import model.homeGroups.HomeGroupBot;
+import model.liveInfo.LiveInfoBot;
 
 public class Main {
     private static String BOT_NAME;
@@ -37,10 +38,10 @@ public class Main {
             botOptions.setProxyType(DefaultBotOptions.ProxyType.SOCKS5);
 
             HomeGroupBot bot = new HomeGroupBot(BOT_TOKEN, BOT_NAME, ADMIN_ID, botOptions);
-//            LiveInfoBot bot2 = new LiveInfoBot(BOT_TOKEN2, BOT_NAME2, botOptions);
+            LiveInfoBot bot2 = new LiveInfoBot(BOT_TOKEN2, BOT_NAME2, botOptions);
 
             botsApi.registerBot(bot);
-//            botsApi.registerBot(bot2);
+            botsApi.registerBot(bot2);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

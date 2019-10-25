@@ -7,19 +7,19 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import model.homeGroups.db.HomeGroup;
 import model.homeGroups.db.StatInfo;
@@ -55,31 +55,29 @@ public class HomeGroupBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            Long userId = update.getMessage().getChat().getId();
-            User user = userService.findByTelegramId(userId);
-
-            Long chatId = update.getMessage().getChatId();
+            Long chatId = update.getMessage().getChat().getId();
             String text = update.getMessage().getText();
+
+            User user = userService.findByTelegramId(chatId);
 
             if (null == user) {
                 if ("/start".equals(text)) {
+                    // когда зашёл первый раз и ввёл старт:
                     send(chatId, "Привет, это бот для ввода инфорации о ячеках. Для дальнейшей работы введите пароль (пароль можно узнать у администратора).");
                 } else if ("qwepswrd".equals(text)) {
-                    user = new User();
-                    user.setFirstName(update.getMessage().getChat().getFirstName());
-                    user.setLastName(update.getMessage().getChat().getLastName());
-                    user.setNickName(update.getMessage().getChat().getUserName());
-                    user.setTelegramUserId(update.getMessage().getChat().getId());
-                    userService.saveOrUpdate(user);
+                    // когда первый раз успешно ввёл пароль:
+                    user = addUser(update.getMessage().getChat());
                     send(chatId, "Данные записаны: " + user.toString());
                     send(adminId, "Добавлен пользователь:" + user.toString());
                 } else {
+                    // когда не успешно ввёл пароль:
                     send(chatId, "Для дальнейшей работы введите пароль (пароль можно узнать у администратора).");
                 }
                 return;
             }
 
             if (null == user.getHomeGroup()) {
+                // когда ввёл пароль, но пользователя ещё не добавили в БД:
                 send(chatId, "Пользователь был добавлен, информация обрабатывается, функционал пока не доступен.");
                 return;
             }
@@ -116,67 +114,15 @@ public class HomeGroupBot extends TelegramLongPollingBot {
                     send(chatId, "Не верный формат! Ввести информацию в формате: Статистика: дд.мм.гг КОЛИЧЕСТВО. Например:\nСтатистика: 01.02.19 987", keyboardMarkup);
                     return;
                 }
-                StatInfo statInfo = new StatInfo();
-                statInfo.setCount(count);
-                statInfo.setEventDate(date);
-                statInfo.setSaveDate(new Timestamp(new Date().getTime()));
-                statInfo.setSaverId(chatId.intValue());
-                statInfo.setComment(user.getComment());
-                statInfo.setHomeGroup(user.getHomeGroup());
-                statInfoService.saveOrUpdate(statInfo);
+
+                StatInfo statInfo = addStatInfo(chatId, user, date, count);
 
                 send(chatId, "Получено: " + count + " за " + getStringOfDate(statInfo.getEventDate()), keyboardMarkup);
                 return;
             }
 
             if ("Не заполнено".equals(text)) {
-                Calendar start;
-                if (user.getHomeGroup().getStartDate() != null) {
-                    start = new GregorianCalendar();
-                    start.setTime(user.getHomeGroup().getStartDate());
-                } else {
-                    start = new GregorianCalendar();
-                }
-
-                Map<Date, StatInfo> statInfoByFirstDayOfWeek = new HashMap<Date, StatInfo>();
-                Set<Date> lostWeeks = new HashSet<Date>();
-                List<StatInfo> allStatInfos = statInfoService.findAllByHomeGroupId(user.getHomeGroup().getId());
-                if (null != allStatInfos) {
-                    for (StatInfo statInfo : allStatInfos) {
-                        Date time = getFirstDayOfWeek(statInfo.getEventDate());
-                        statInfoByFirstDayOfWeek.put(time, statInfo);
-                    }
-                }
-                start.setTime(getFirstDayOfWeek(start.getTime()));
-                while (start.before(new GregorianCalendar())) {
-                    if (statInfoByFirstDayOfWeek.get(start.getTime()) == null) {
-                        lostWeeks.add(start.getTime());
-                    }
-                    start.add(Calendar.DAY_OF_MONTH, 7);
-                }
-
-                if (lostWeeks.isEmpty()) {
-                    send(chatId, "Все данные введены, задолженностей нет", keyboardMarkup);
-                } else {
-                    StringBuilder stringBuilder = new StringBuilder("Нет информации за следующие недели:\n");
-                    int i = 1;
-                    for (Date monday : lostWeeks) {
-                        stringBuilder.append(i);
-                        stringBuilder.append(") ");
-                        stringBuilder.append(getStringOfDate(monday));
-                        stringBuilder.append("-");
-
-                        Calendar calendar = new GregorianCalendar();
-                        calendar.setTime(monday);
-                        calendar.add(Calendar.DAY_OF_MONTH, 6);
-                        stringBuilder.append(getStringOfDate(calendar.getTime()));
-                        stringBuilder.append("\n");
-
-                        i++;
-                    }
-
-                    send(chatId, stringBuilder.toString(), keyboardMarkup);
-                }
+                sendLostStatInfos(chatId, user, keyboardMarkup);
 
                 return;
             }
@@ -188,61 +134,174 @@ public class HomeGroupBot extends TelegramLongPollingBot {
             }
 
             if ("Список ячеек".equals(text)) {
-                List<HomeGroup> groups = homeGroupService.findAll(HomeGroup.LIEDER_FIELD);
-                StringBuilder groupsInfos = new StringBuilder();
-                if (null != groups) {
-                    int i = 1;
-                    for (HomeGroup group : groups) {
-                        groupsInfos.append(i++);
-                        groupsInfos.append(")");
-                        if (adminId.equals(chatId)) {
-                            groupsInfos.append(" лидер: ");
-                            groupsInfos.append(group.getComment());
-                        }
-                        groupsInfos.append(", адрес: ");
-                        groupsInfos.append(group.getAddress());
-                        if (null != group.getLiederPhoneNumber()) {
-                            groupsInfos.append(", номер лидера ячейки: ");
-                            groupsInfos.append(formatPhoneNumber(group.getLiederPhoneNumber()));
-                        }
-                        if (null != group.getLieder()) {
-                            groupsInfos.append(", telegram: @");
-                            groupsInfos.append(group.getLieder().getNickName());
-                        }
-                        groupsInfos.append(", время: ");
-                        groupsInfos.append(group.getDayOfTheWeek().getTitle());
-                        groupsInfos.append(" в ");
-                        groupsInfos.append(group.getTime());
-                        groupsInfos.append("\n\n");
-                    }
-                }
-                if (groupsInfos.length() == 0) {
-                    groupsInfos.append("пусто");
-                }
-                send(chatId, groupsInfos.toString());
+                sendHomeGroupsList(chatId, keyboardMarkup);
                 return;
             }
 
             if (adminId.equals(user.getTelegramUserId())) {
                 if ("Пользователи".equals(text)) {
-                    List<User> allUsers = userService.findAll();
-                    StringBuilder userInfos = new StringBuilder();
-                    if (null != allUsers) {
-                        for (User usr : allUsers) {
-                            userInfos.append(usr.toString());
-                            userInfos.append("\n");
-                        }
-                    }
-                    if (userInfos.length() == 0) {
-                        userInfos.append("пусто");
-                    }
-                    send(adminId, userInfos.toString(), keyboardMarkup);
+                    sendUsersList(keyboardMarkup);
                     return;
                 }
             }
 
             send(chatId, "Привет, это бот для ввод инфорации о домашних группах.", keyboardMarkup);
         }
+    }
+
+    private void sendUsersList(ReplyKeyboardMarkup keyboardMarkup) {
+        List<User> allUsers = userService.findAll();
+        StringBuilder userInfos = new StringBuilder();
+        if (null != allUsers) {
+            int i= 1;
+            for (User usr : allUsers) {
+                userInfos.append(i);
+                userInfos.append(") ");
+                if (usr.isAdmin()) {
+                    userInfos.append("admin=");
+                    userInfos.append(usr.isAdmin());
+                    userInfos.append(", ");
+                }
+                userInfos.append("id=");
+                userInfos.append(usr.getId());
+                userInfos.append(", chatId=");
+                userInfos.append(usr.getTelegramUserId());
+                userInfos.append(", firstName=");
+                userInfos.append(usr.getFirstName());
+                userInfos.append(", lastName=");
+                userInfos.append(usr.getLastName());
+                userInfos.append(", nickName=");
+                userInfos.append(usr.getNickName());
+                userInfos.append(", comment=");
+                userInfos.append(usr.getComment());
+                userInfos.append("\n\n");
+            }
+        }
+        if (userInfos.length() == 0) {
+            userInfos.append("пусто");
+        }
+        send(adminId, userInfos.toString(), keyboardMarkup);
+    }
+
+    private void sendHomeGroupsList(Long chatId, ReplyKeyboardMarkup keyboardMarkup) {
+        List<HomeGroup> groups = homeGroupService.findAll(HomeGroup.LIEDER_FIELD);
+        StringBuilder groupsInfos = new StringBuilder();
+        if (null != groups) {
+            int i = 1;
+            for (HomeGroup group : groups) {
+                groupsInfos.append(i++);
+                groupsInfos.append(")");
+                if (adminId.equals(chatId)) {
+                    groupsInfos.append(" лидер: ");
+                    groupsInfos.append(group.getComment());
+                }
+                groupsInfos.append(", адрес: ");
+                groupsInfos.append(group.getAddress());
+                if (null != group.getLiederPhoneNumber()) {
+                    groupsInfos.append(", номер лидера ячейки: ");
+                    groupsInfos.append(formatPhoneNumber(group.getLiederPhoneNumber()));
+                }
+                if (null != group.getLieder()) {
+                    groupsInfos.append(", telegram: @");
+                    groupsInfos.append(group.getLieder().getNickName());
+                }
+                groupsInfos.append(", время: ");
+                groupsInfos.append(group.getDayOfTheWeek().getTitle());
+                groupsInfos.append(" в ");
+                groupsInfos.append(group.getTime());
+                groupsInfos.append("\n\n");
+            }
+        }
+        if (groupsInfos.length() == 0) {
+            groupsInfos.append("пусто");
+        }
+        send(chatId, groupsInfos.toString(), keyboardMarkup);
+    }
+
+    private void sendLostStatInfos(Long chatId, User user, ReplyKeyboardMarkup keyboardMarkup) {
+        Map<Date, StatInfo> statInfoByFirstDayOfWeek = getStatInfoByFirstDayOfWeek(user);
+        Calendar start = getStartDate(user);
+        List<Date> lostWeeks = new ArrayList<Date>();
+        while (start.before(new GregorianCalendar())) {
+            if (statInfoByFirstDayOfWeek.get(start.getTime()) == null) {
+                lostWeeks.add(start.getTime());
+            }
+            start.add(Calendar.DAY_OF_MONTH, 7);
+        }
+
+        if (lostWeeks.isEmpty()) {
+            send(chatId, "Все данные введены, задолженностей нет", keyboardMarkup);
+        } else {
+            StringBuilder stringBuilder = new StringBuilder("Нет информации за следующие недели:\n");
+            int i = 1;
+            for (Date monday : lostWeeks) {
+                stringBuilder.append(i);
+                stringBuilder.append(") ");
+                stringBuilder.append(getStringOfDate(monday));
+                stringBuilder.append("-");
+
+                Calendar calendar = new GregorianCalendar();
+                calendar.setTime(monday);
+                calendar.add(Calendar.DAY_OF_MONTH, 6);
+                stringBuilder.append(getStringOfDate(calendar.getTime()));
+                stringBuilder.append("\n");
+
+                i++;
+            }
+
+            send(chatId, stringBuilder.toString(), keyboardMarkup);
+        }
+    }
+
+    private Map<Date, StatInfo> getStatInfoByFirstDayOfWeek(User user) {
+        Map<Date, StatInfo> statInfoByFirstDayOfWeek = new HashMap<Date, StatInfo>();
+        List<StatInfo> allStatInfos = statInfoService.findAllByHomeGroupId(user.getHomeGroup().getId());
+        if (null != allStatInfos) {
+            for (StatInfo statInfo : allStatInfos) {
+                Date time = getFirstDayOfWeek(statInfo.getEventDate());
+                statInfoByFirstDayOfWeek.put(time, statInfo);
+            }
+        }
+        return statInfoByFirstDayOfWeek;
+    }
+
+    private Calendar getStartDate(User user) {
+        Calendar start;
+        if (user.getHomeGroup().getStartDate() != null) {
+            start = new GregorianCalendar();
+            start.setTime(user.getHomeGroup().getStartDate());
+        } else {
+            start = new GregorianCalendar();
+        }
+
+        start.setTime(getFirstDayOfWeek(start.getTime()));
+        return start;
+    }
+
+    private StatInfo addStatInfo(Long chatId, User user, Date eventDate, Integer count) {
+        StatInfo statInfo = statInfoService.findByDateAndHomeGroupId(eventDate, user.getHomeGroup().getId());
+        if (statInfo == null) {
+            statInfo = new StatInfo();
+        }
+        statInfo.setCount(count);
+        statInfo.setEventDate(eventDate);
+        statInfo.setSaveDate(new Timestamp(new Date().getTime()));
+        statInfo.setSaverId(chatId.intValue());
+        statInfo.setComment(user.getComment());
+        statInfo.setHomeGroup(user.getHomeGroup());
+        statInfoService.saveOrUpdate(statInfo);
+        return statInfo;
+    }
+
+    private User addUser(Chat chat) {
+        User user;
+        user = new User();
+        user.setFirstName(chat.getFirstName());
+        user.setLastName(chat.getLastName());
+        user.setNickName(chat.getUserName());
+        user.setTelegramUserId(chat.getId());
+        userService.saveOrUpdate(user);
+        return user;
     }
 
     private Date getFirstDayOfWeek(Date date) {
