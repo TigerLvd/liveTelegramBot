@@ -17,7 +17,6 @@ public class StatInfoServiceImpl implements StatInfoService {
         return dao;
     }
 
-    @Autowired
     public void setDao(StatInfoDaoService dao) {
         this.dao = dao;
     }

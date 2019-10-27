@@ -16,7 +16,6 @@ public class HomeGroupServiceImpl implements HomeGroupService {
         return dao;
     }
 
-    @Autowired
     public void setDao(HomeGroupDaoService dao) {
         this.dao = dao;
     }

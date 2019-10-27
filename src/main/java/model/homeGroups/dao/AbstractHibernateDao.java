@@ -24,7 +24,6 @@ public abstract class AbstractHibernateDao<T> implements Dao<T> {
         return sessionFactory;
     }
 
-    @Autowired
     public void setSessionFactory(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }

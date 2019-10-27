@@ -18,6 +18,8 @@ public class User {
 
     private boolean admin;
 
+    private boolean leader;
+
     private String firstName;
 
     private String lastName;
@@ -87,6 +89,15 @@ public class User {
 
     public void setAdmin(boolean admin) {
         this.admin = admin;
+    }
+
+    @Column(name = "IS_LEADER")
+    public boolean isLeader() {
+        return leader;
+    }
+
+    public void setLeader(boolean leader) {
+        this.leader = leader;
     }
 
     @Column(name = "COMMENT")

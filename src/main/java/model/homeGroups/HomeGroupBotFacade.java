@@ -1,0 +1,29 @@
+package model.homeGroups;
+
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+
+import java.util.Date;
+
+import model.homeGroups.db.StatInfo;
+import model.homeGroups.db.User;
+
+public interface HomeGroupBotFacade {
+
+    void sendUsersList(ReplyKeyboardMarkup keyboardMarkup, Long chatId);
+
+    void sendHomeGroupsList(Long chatId, ReplyKeyboardMarkup keyboardMarkup, Long adminId);
+
+    void sendLostStatInfos(Long chatId, User user, ReplyKeyboardMarkup keyboardMarkup, Boolean sendEmpty);
+
+    void send(Long chatId, String str, ReplyKeyboardMarkup keyboard);
+
+    void send(Long chatId, String str);
+
+    StatInfo addStatInfo(Long chatId, User user, Date eventDate, Integer count);
+
+    User addUser(Chat chat);
+
+    void setBot(TelegramLongPollingBot homeGroupBot);
+}

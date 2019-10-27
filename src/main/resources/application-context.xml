@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+       http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
 
     <context:property-placeholder location="/WEB-INF/spring.properties" />
 
@@ -68,8 +70,22 @@
         <property name="persistentClass" value="model.homeGroups.db.HomeGroup"/>
     </bean>
 
-<!--    <bean id="HomeGroupBot" class="model.homeGroups.HomeGroupBot">-->
-<!--    </bean>-->
+    <bean id="Scheduler" class="model.homeGroups.Scheduler">
+        <property name="userService" ref="UserService"/>
+        <property name="homeGroupBotFacade" ref="HomeGroupBotFacade"/>
+    </bean>
+
+    <bean id="HomeGroupBotFacade" class="model.homeGroups.HomeGroupBotFacadeImpl">
+        <property name="userService" ref="UserService"/>
+        <property name="homeGroupService" ref="HomeGroupService"/>
+        <property name="statInfoService" ref="StatInfoService"/>
+    </bean>
+
+    <task:scheduled-tasks scheduler="printingScheduler">
+        <task:scheduled ref="Scheduler" method="checkLostStatInfos" cron="0 0 11 * * 3"/>
+    </task:scheduled-tasks>
+
+    <task:scheduler id="printingScheduler" />
 
     <bean id="AbstractHibernateDao" class="model.homeGroups.dao.AbstractHibernateDao"
           abstract="true">
