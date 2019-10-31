@@ -32,6 +32,8 @@ public class User {
 
     private String comment;
 
+    private boolean notificationEnabled;
+
     public User() {
     }
 
@@ -117,6 +119,15 @@ public class User {
 
     public void setHomeGroup(HomeGroup homeGroup) {
         this.homeGroup = homeGroup;
+    }
+
+    @Column(name = "IS_NOTIFICATION_ENABLED")
+    public boolean isNotificationEnabled() {
+        return notificationEnabled;
+    }
+
+    public void setNotificationEnabled(boolean enableNotification) {
+        this.notificationEnabled = enableNotification;
     }
 
     @Override

@@ -5,11 +5,15 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 import model.homeGroups.db.StatInfo;
 import model.homeGroups.db.User;
@@ -22,7 +26,6 @@ public class HomeGroupBot extends TelegramLongPollingBot {
     private final String botName;
 
     private HomeGroupBotFacade homeGroupBotFacade;
-
     private UserService userService;
 
     public HomeGroupBot(String botToken, String botName, Long adminId, DefaultBotOptions options) {
@@ -71,7 +74,7 @@ public class HomeGroupBot extends TelegramLongPollingBot {
 
             ReplyKeyboardMarkup keyboardMarkup;
 
-            if (adminId.equals(user.getTelegramUserId())) {
+            if (user.isAdmin()) {
                 keyboardMarkup = new CustomKeyboardMarkup("Пользователи", "Ввод статистики", "Не заполнено", "Настройка уведомлений", "Список ячеек");
             } else {
                 keyboardMarkup = new CustomKeyboardMarkup("Ввод статистики", "Не заполнено", "Настройка уведомлений", "Список ячеек");
@@ -117,8 +120,7 @@ public class HomeGroupBot extends TelegramLongPollingBot {
             }
 
             if ("Настройка уведомлений".equals(text)) {
-                //todo доделать
-                homeGroupBotFacade.send(chatId, "Раздел в разработке", keyboardMarkup);
+                sendNotificationSettings(chatId, user, null);
                 return;
             }
 
@@ -135,7 +137,40 @@ public class HomeGroupBot extends TelegramLongPollingBot {
             }
 
             homeGroupBotFacade.send(chatId, "Привет, это бот для ввод инфорации о домашних группах.", keyboardMarkup);
+        } else if (update.hasCallbackQuery()) {
+            String callData = update.getCallbackQuery().getData();
+            Long chatId = update.getCallbackQuery().getMessage().getChatId();
+            Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+
+            User user = userService.findByTelegramId(chatId);
+            if (null != user) {
+                if (callData.equals("notice_on") && !user.isNotificationEnabled()) {
+                    user.setNotificationEnabled(true);
+                    userService.saveOrUpdate(user);
+                    sendNotificationSettings(chatId, user, messageId);
+                } else if (callData.equals("notice_off") && user.isNotificationEnabled()) {
+                    user.setNotificationEnabled(false);
+                    userService.saveOrUpdate(user);
+                    sendNotificationSettings(chatId, user, messageId);
+                }
+            }
         }
+    }
+
+    private void sendNotificationSettings(Long chatId, User user, Integer msgId) {
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<List<InlineKeyboardButton>>();
+        markupInline.setKeyboard(rowsInline);
+        List<InlineKeyboardButton> rowInline = new ArrayList<InlineKeyboardButton>();
+        rowsInline.add(rowInline);
+        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+        rowInline.add(inlineKeyboardButton);
+
+        boolean switchOn = user.isNotificationEnabled();
+        inlineKeyboardButton.setText(switchOn ? "отключить уведомления" : "включить уведомления");
+        inlineKeyboardButton.setCallbackData("notice_" + (switchOn ? "off" : "on"));
+
+        homeGroupBotFacade.send(chatId, msgId, switchOn ? "уведомления включены" : "уведомления отключены", markupInline);
     }
 
     private Date getDate(String dayString, String mounthString, String yearString) {

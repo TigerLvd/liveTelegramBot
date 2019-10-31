@@ -20,7 +20,7 @@ public class Scheduler {
 
         List<User> allUsers = userService.findAll();
         for (User user : allUsers) {
-            if (null == user.getTelegramUserId()) {
+            if (null == user.getTelegramUserId() || !user.isNotificationEnabled()) {
                 continue;
             }
 

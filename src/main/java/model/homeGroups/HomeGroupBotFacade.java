@@ -2,6 +2,7 @@ package model.homeGroups;
 
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 
 import java.util.Date;
@@ -18,6 +19,8 @@ public interface HomeGroupBotFacade {
     void sendLostStatInfos(Long chatId, User user, ReplyKeyboardMarkup keyboardMarkup, Boolean sendEmpty);
 
     void send(Long chatId, String str, ReplyKeyboardMarkup keyboard);
+
+    void send(Long chatId, Integer messageId, String str, InlineKeyboardMarkup keyboard);
 
     void send(Long chatId, String str);
 

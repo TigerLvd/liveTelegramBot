@@ -2,7 +2,9 @@ package model.homeGroups;
 
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -61,6 +63,7 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
                 userInfos.append(", isLeader=");
                 userInfos.append(usr.isLeader());
                 userInfos.append("\n\n");
+                i++;
             }
         }
         if (userInfos.length() == 0) {
@@ -209,7 +212,7 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
         Calendar calendar = new GregorianCalendar();
         calendar.setTime(date);
         int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-        if (dayOfWeek == 0) {
+        if (dayOfWeek == 1) {
             dayOfWeek = 7;
         } else {
             dayOfWeek--;
@@ -240,6 +243,33 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
     public void send(Long chatId, String str, ReplyKeyboardMarkup keyboard) {
         SendMessage message = new SendMessage()
                 .setChatId(chatId)
+                .setText(str)
+                .setReplyMarkup(keyboard);
+        try {
+            bot.execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void send(Long chatId, Integer messageId, String str, InlineKeyboardMarkup keyboard) {
+        if (null == messageId) {
+            SendMessage message = new SendMessage()
+                    .setChatId(chatId)
+                    .setText(str)
+                    .setReplyMarkup(keyboard);
+            try {
+                bot.execute(message);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+            return;
+        }
+
+        EditMessageText message = new EditMessageText()
+                .setChatId(chatId)
+                .setMessageId(messageId)
                 .setText(str)
                 .setReplyMarkup(keyboard);
         try {
