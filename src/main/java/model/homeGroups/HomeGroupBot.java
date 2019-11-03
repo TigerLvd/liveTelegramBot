@@ -41,6 +41,19 @@ public class HomeGroupBot extends TelegramLongPollingBot {
         homeGroupBotFacade.setBot(this);
     }
 
+    public HomeGroupBot(String botToken, String botName, Long adminId) {
+        super();
+
+        this.botToken = botToken;
+        this.botName = botName;
+        this.adminId = adminId;
+
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("application-context.xml");
+        userService = (UserService) applicationContext.getBean("UserService");
+        homeGroupBotFacade = (HomeGroupBotFacade) applicationContext.getBean("HomeGroupBotFacade");
+        homeGroupBotFacade.setBot(this);
+    }
+
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
@@ -173,13 +186,13 @@ public class HomeGroupBot extends TelegramLongPollingBot {
         homeGroupBotFacade.send(chatId, msgId, switchOn ? "уведомления включены" : "уведомления отключены", markupInline);
     }
 
-    private Date getDate(String dayString, String mounthString, String yearString) {
+    private Date getDate(String dayString, String monthString, String yearString) {
         Date date;
         Integer day = new Integer(dayString);
-        Integer mounth = new Integer(mounthString) - 1;
+        Integer month = new Integer(monthString) - 1;
         int year = yearString.length() == 4 ? new Integer(yearString) : new Integer(yearString) + 2000;
 
-        Calendar calendar = new GregorianCalendar(year, mounth , day);
+        Calendar calendar = new GregorianCalendar(year, month , day);
         date = calendar.getTime();
         return date;
     }

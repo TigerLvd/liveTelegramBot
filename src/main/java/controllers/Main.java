@@ -23,6 +23,7 @@ public class Main {
     private static Integer PROXY_PORT;
 
     private static Long ADMIN_ID;
+    private final static Boolean USE_PROXY = false;
 
     public static void main(String[] args) {
 
@@ -33,12 +34,21 @@ public class Main {
             TelegramBotsApi botsApi = new TelegramBotsApi();
 
             DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class);
-            botOptions.setProxyHost(PROXY_HOST);
-            botOptions.setProxyPort(PROXY_PORT);
-            botOptions.setProxyType(DefaultBotOptions.ProxyType.SOCKS5);
+            HomeGroupBot bot;
+            LiveInfoBot bot2;
+            if (Boolean.TRUE.equals(USE_PROXY)) {
+                // use PROXY
+                botOptions.setProxyHost(PROXY_HOST);
+                botOptions.setProxyPort(PROXY_PORT);
+                botOptions.setProxyType(DefaultBotOptions.ProxyType.SOCKS5);
 
-            HomeGroupBot bot = new HomeGroupBot(BOT_TOKEN, BOT_NAME, ADMIN_ID, botOptions);
-            LiveInfoBot bot2 = new LiveInfoBot(BOT_TOKEN2, BOT_NAME2, botOptions);
+                bot = new HomeGroupBot(BOT_TOKEN, BOT_NAME, ADMIN_ID, botOptions);
+                bot2 = new LiveInfoBot(BOT_TOKEN2, BOT_NAME2, botOptions);
+            } else {
+                // use VPN
+                bot = new HomeGroupBot(BOT_TOKEN, BOT_NAME, ADMIN_ID);
+                bot2 = new LiveInfoBot(BOT_TOKEN2, BOT_NAME2);
+            }
 
             botsApi.registerBot(bot);
             botsApi.registerBot(bot2);

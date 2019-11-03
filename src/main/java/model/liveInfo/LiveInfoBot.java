@@ -26,6 +26,12 @@ public class LiveInfoBot extends TelegramLongPollingBot {
         this.botName = botName;
     }
 
+    public LiveInfoBot(String botToken, String botName) {
+        super();
+        this.botToken = botToken;
+        this.botName = botName;
+    }
+
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
