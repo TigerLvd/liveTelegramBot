@@ -18,6 +18,8 @@ public interface HomeGroupBotFacade {
 
     void sendLostStatInfos(Long chatId, User user, ReplyKeyboardMarkup keyboardMarkup, Boolean sendEmpty);
 
+    void sendEnteredStatInfos(Long chatId, User user, ReplyKeyboardMarkup keyboardMarkup);
+
     void send(Long chatId, String str, ReplyKeyboardMarkup keyboard);
 
     void send(Long chatId, Integer messageId, String str, InlineKeyboardMarkup keyboard);

@@ -88,9 +88,9 @@ public class HomeGroupBot extends TelegramLongPollingBot {
             ReplyKeyboardMarkup keyboardMarkup;
 
             if (user.isAdmin()) {
-                keyboardMarkup = new CustomKeyboardMarkup("Пользователи", "Ввод статистики", "Не заполнено", "Настройка уведомлений", "Список ячеек");
+                keyboardMarkup = new CustomKeyboardMarkup("Пользователи", "Ввод статистики", "Не заполнено", "Введено статисики", "Настройка уведомлений", "Список ячеек");
             } else {
-                keyboardMarkup = new CustomKeyboardMarkup("Ввод статистики", "Не заполнено", "Настройка уведомлений", "Список ячеек");
+                keyboardMarkup = new CustomKeyboardMarkup("Ввод статистики", "Не заполнено", "Введено статисики", "Настройка уведомлений", "Список ячеек");
             }
 
             if ("Ввод статистики".equals(text)) {
@@ -129,6 +129,11 @@ public class HomeGroupBot extends TelegramLongPollingBot {
 
             if ("Не заполнено".equals(text)) {
                 homeGroupBotFacade.sendLostStatInfos(chatId, user, keyboardMarkup, true);
+                return;
+            }
+
+            if ("Введено статисики".equals(text)) {
+                homeGroupBotFacade.sendEnteredStatInfos(chatId, user, keyboardMarkup);
                 return;
             }
 

@@ -157,6 +157,28 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
         }
     }
 
+    @Override
+    public void sendEnteredStatInfos(Long chatId, User user, ReplyKeyboardMarkup keyboardMarkup) {
+        List<StatInfo> allStatInfos = statInfoService.findAllByHomeGroupId(user.getHomeGroup().getId());
+        if (null != allStatInfos && !allStatInfos.isEmpty()) {
+            StringBuilder stringBuilder = new StringBuilder();
+            int i = 1;
+            stringBuilder.append("Введено:\n\n");
+            for (StatInfo statInfo : allStatInfos) {
+                stringBuilder.append(i);
+                stringBuilder.append(") ");
+                stringBuilder.append(statInfo.getCount());
+                stringBuilder.append(" за ");
+                stringBuilder.append(getStringOfDate(statInfo.getEventDate()));
+                stringBuilder.append("\n\n");
+                i++;
+            }
+            send(chatId, stringBuilder.toString(), keyboardMarkup);
+        } else {
+            send(chatId, "ничего не было введено", keyboardMarkup);
+        }
+    }
+
     private Map<Date, StatInfo> getStatInfoByFirstDayOfWeek(User user) {
         Map<Date, StatInfo> statInfoByFirstDayOfWeek = new HashMap<Date, StatInfo>();
         List<StatInfo> allStatInfos = statInfoService.findAllByHomeGroupId(user.getHomeGroup().getId());
