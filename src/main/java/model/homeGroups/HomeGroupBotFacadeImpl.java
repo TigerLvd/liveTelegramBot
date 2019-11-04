@@ -73,6 +73,48 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
     }
 
     @Override
+    public void sendNewUsersList(ReplyKeyboardMarkup keyboardMarkup, Long chatId) {
+        //todo переделать на новый сервис
+        List<User> allUsers = userService.findAll();
+        StringBuilder userInfos = new StringBuilder();
+        if (null != allUsers) {
+            int i= 1;
+            for (User usr : allUsers) {
+                if (usr.getHomeGroup() != null) {
+                    continue;
+                }
+                userInfos.append(i);
+                userInfos.append(") ");
+                if (usr.isAdmin()) {
+                    userInfos.append("admin=");
+                    userInfos.append(usr.isAdmin());
+                    userInfos.append(", ");
+                }
+                userInfos.append("id=");
+                userInfos.append(usr.getId());
+                userInfos.append(", chatId=");
+                userInfos.append(usr.getTelegramUserId());
+                userInfos.append(", firstName=");
+                userInfos.append(usr.getFirstName());
+                userInfos.append(", lastName=");
+                userInfos.append(usr.getLastName());
+                userInfos.append(", nickName=");
+                userInfos.append(usr.getNickName());
+                userInfos.append(", comment=");
+                userInfos.append(usr.getComment());
+                userInfos.append(", isLeader=");
+                userInfos.append(usr.isLeader());
+                userInfos.append("\n\n");
+                i++;
+            }
+        }
+        if (userInfos.length() == 0) {
+            userInfos.append("пусто");
+        }
+        send(chatId, userInfos.toString(), keyboardMarkup);
+    }
+
+    @Override
     public void sendHomeGroupsList(Long chatId, ReplyKeyboardMarkup keyboardMarkup, Long adminId) {
         List<HomeGroup> groups = homeGroupService.findAll(HomeGroup.LIEDER_FIELD);
         StringBuilder groupsInfos = new StringBuilder();

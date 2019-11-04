@@ -14,6 +14,8 @@ public interface HomeGroupBotFacade {
 
     void sendUsersList(ReplyKeyboardMarkup keyboardMarkup, Long chatId);
 
+    void sendNewUsersList(ReplyKeyboardMarkup keyboardMarkup, Long chatId);
+
     void sendHomeGroupsList(Long chatId, ReplyKeyboardMarkup keyboardMarkup, Long adminId);
 
     void sendLostStatInfos(Long chatId, User user, ReplyKeyboardMarkup keyboardMarkup, Boolean sendEmpty);
