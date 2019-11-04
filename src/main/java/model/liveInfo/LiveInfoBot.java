@@ -14,7 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class LiveInfoBot extends TelegramLongPollingBot {
-    final int COLUMN_NUMBER = 3;
+    final int COLUMN_NUMBER = 2;
     final boolean IS_CHANGE_CURRENT_MESSAGE = false;
 
     private String botToken;
