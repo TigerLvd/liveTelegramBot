@@ -11,7 +11,7 @@ public class CustomKeyboardMarkup extends ReplyKeyboardMarkup {
         List<KeyboardRow> keyboard = new ArrayList<KeyboardRow>();
         KeyboardRow row = new KeyboardRow();
         for (String keyName : keyNames) {
-            if (row.size() == 3) {
+            if (row.size() == 2) {
                 keyboard.add(row);
                 row = new KeyboardRow();
             }

@@ -81,11 +81,15 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
             for (HomeGroup group : groups) {
                 groupsInfos.append(i++);
                 groupsInfos.append(") ");
-                if (null != group.getLieder()) {
+                if (null != group.getLieder() && (null != group.getLieder().getLastName() || null != group.getLieder().getFirstName())) {
                     groupsInfos.append("лидер: ");
-                    groupsInfos.append(group.getLieder().getLastName());
-                    groupsInfos.append(" ");
-                    groupsInfos.append(group.getLieder().getFirstName());
+                    if (null != group.getLieder().getLastName()) {
+                        groupsInfos.append(group.getLieder().getLastName());
+                        groupsInfos.append(" ");
+                    }
+                    if (null != group.getLieder().getFirstName()) {
+                        groupsInfos.append(group.getLieder().getFirstName());
+                    }
                     groupsInfos.append(", ");
                 }
                 if (adminId.equals(chatId)) {
@@ -98,7 +102,7 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
                     groupsInfos.append(formatPhoneNumber(group.getLiederPhoneNumber()));
                     groupsInfos.append(", ");
                 }
-                if (null != group.getLieder()) {
+                if (null != group.getLieder() && null != group.getLieder().getNickName()) {
                     groupsInfos.append("telegram: @");
                     groupsInfos.append(group.getLieder().getNickName());
                     groupsInfos.append(", ");
