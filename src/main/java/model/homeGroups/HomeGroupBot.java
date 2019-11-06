@@ -28,6 +28,16 @@ public class HomeGroupBot extends TelegramLongPollingBot {
     private HomeGroupBotFacade homeGroupBotFacade;
     private UserService userService;
 
+    private final static String TO_INPUT_STAT_INFO_FIELD = "Ввод статистики";
+    private final static String ENTERED_STAT_INFO_FIELD = "Введено статистики";
+    private final static String USER_FIELD = "Пользователи";
+    private final static String EMPTY_STAT_INFO_FIELD = "Не заполнено";
+    private final static String ALERT_SETTINGS_FIELD = "Настройка уведомлений";
+    private final static String HOME_GROUPS_LIST_FIELD = "Список ячеек";
+    private final static String NEW_USERS_LIST_FIELD = "Новые пользователи";
+    private final static String INFO_ABOUT_FIELD = "Инфа по ";
+    private final static String INFO_ABOUT_FIELD2 = "Инфа по";
+
     public HomeGroupBot(String botToken, String botName, Long adminId, DefaultBotOptions options) {
         super(options);
 
@@ -88,12 +98,12 @@ public class HomeGroupBot extends TelegramLongPollingBot {
             ReplyKeyboardMarkup keyboardMarkup;
 
             if (user.isAdmin()) {
-                keyboardMarkup = new CustomKeyboardMarkup("Пользователи", "Ввод статистики", "Не заполнено", "Введено статисики", "Настройка уведомлений", "Список ячеек", "Новые пользователи");
+                keyboardMarkup = new CustomKeyboardMarkup(USER_FIELD, TO_INPUT_STAT_INFO_FIELD, EMPTY_STAT_INFO_FIELD, ENTERED_STAT_INFO_FIELD, ALERT_SETTINGS_FIELD, HOME_GROUPS_LIST_FIELD, NEW_USERS_LIST_FIELD, INFO_ABOUT_FIELD);
             } else {
-                keyboardMarkup = new CustomKeyboardMarkup("Ввод статистики", "Не заполнено", "Введено статисики", "Настройка уведомлений", "Список ячеек");
+                keyboardMarkup = new CustomKeyboardMarkup(TO_INPUT_STAT_INFO_FIELD, EMPTY_STAT_INFO_FIELD, ENTERED_STAT_INFO_FIELD, ALERT_SETTINGS_FIELD, HOME_GROUPS_LIST_FIELD);
             }
 
-            if ("Ввод статистики".equals(text)) {
+            if (TO_INPUT_STAT_INFO_FIELD.equals(text)) {
                 String msg = "Введите информацию в формате: Статистика: дд.мм.гг количество. Например:\nСтатистика: 01.02.19 987";
                 homeGroupBotFacade.send(chatId, msg, keyboardMarkup);
                 return;
@@ -127,33 +137,42 @@ public class HomeGroupBot extends TelegramLongPollingBot {
                 return;
             }
 
-            if ("Не заполнено".equals(text)) {
+            if (EMPTY_STAT_INFO_FIELD.equals(text)) {
                 homeGroupBotFacade.sendLostStatInfos(chatId, user, keyboardMarkup, true);
                 return;
             }
 
-            if ("Введено статисики".equals(text)) {
+            if (ENTERED_STAT_INFO_FIELD.equals(text)) {
                 homeGroupBotFacade.sendEnteredStatInfos(chatId, user, keyboardMarkup);
                 return;
             }
 
-            if ("Настройка уведомлений".equals(text)) {
+            if (ALERT_SETTINGS_FIELD.equals(text)) {
                 sendNotificationSettings(chatId, user, null);
                 return;
             }
 
-            if ("Список ячеек".equals(text)) {
+            if (HOME_GROUPS_LIST_FIELD.equals(text)) {
                 homeGroupBotFacade.sendHomeGroupsList(chatId, keyboardMarkup, adminId);
                 return;
             }
 
             if (adminId.equals(user.getTelegramUserId())) {
-                if ("Пользователи".equals(text)) {
+                if (USER_FIELD.equals(text)) {
                     homeGroupBotFacade.sendUsersList(keyboardMarkup, adminId);
                     return;
                 }
-                if ("Новые пользователи".equals(text)) {
+                if (NEW_USERS_LIST_FIELD.equals(text)) {
                     homeGroupBotFacade.sendNewUsersList(keyboardMarkup, adminId);
+                    return;
+                }
+                if (text.startsWith(INFO_ABOUT_FIELD)) {
+                    String[] inputStrings = text.split(INFO_ABOUT_FIELD);
+                    homeGroupBotFacade.sendInfoAbout(chatId, new Long(inputStrings[1]), keyboardMarkup);
+                    return;
+                }
+                if (INFO_ABOUT_FIELD2.equals(text)) {
+                    homeGroupBotFacade.send(chatId, INFO_ABOUT_FIELD, keyboardMarkup);
                     return;
                 }
             }

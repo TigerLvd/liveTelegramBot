@@ -387,4 +387,52 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
     public void setBot(TelegramLongPollingBot homeGroupBot) {
         this.bot = homeGroupBot;
     }
+
+    @Override
+    public void sendInfoAbout(Long chatId, Long userId, ReplyKeyboardMarkup keyboardMarkup) {
+        User userInfo = userService.findById(userId);
+        if (null != userInfo) {
+            StringBuilder userInfos = new StringBuilder();
+            if (userInfo.isAdmin()) {
+                userInfos.append("admin=");
+                userInfos.append(userInfo.isAdmin());
+                userInfos.append(", ");
+            }
+            userInfos.append("id=");
+            userInfos.append(userInfo.getId());
+            userInfos.append(", chatId=");
+            userInfos.append(userInfo.getTelegramUserId());
+            userInfos.append(", firstName=");
+            userInfos.append(userInfo.getFirstName());
+            userInfos.append(", lastName=");
+            userInfos.append(userInfo.getLastName());
+            userInfos.append(", nickName=");
+            userInfos.append(userInfo.getNickName());
+            userInfos.append(", comment=");
+            userInfos.append(userInfo.getComment());
+            userInfos.append(", isLeader=");
+            userInfos.append(userInfo.isLeader());
+            if (null != userInfo.getHomeGroup()) {
+                userInfos.append("\n\nВведено статистики:\n\n");
+                List<StatInfo> allStatInfos = statInfoService.findAllByHomeGroupId(userInfo.getHomeGroup().getId());
+                if (null != allStatInfos && !allStatInfos.isEmpty()) {
+                    int i = 1;
+                    for (StatInfo statInfo : allStatInfos) {
+                        userInfos.append(i);
+                        userInfos.append(") ");
+                        userInfos.append(statInfo.getCount());
+                        userInfos.append(" за ");
+                        userInfos.append(getStringOfDate(statInfo.getEventDate()));
+                        userInfos.append("\n\n");
+                        i++;
+                    }
+                } else {
+                    userInfos.append("ничего не было введено");
+                }
+            }
+            send(chatId, userInfos.toString(), keyboardMarkup);
+        } else {
+            send(chatId, "Нет пользователя с указанным id", keyboardMarkup);
+        }
+    }
 }

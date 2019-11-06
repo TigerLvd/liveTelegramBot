@@ -33,4 +33,6 @@ public interface HomeGroupBotFacade {
     User addUser(Chat chat);
 
     void setBot(TelegramLongPollingBot homeGroupBot);
+
+    void sendInfoAbout(Long chatId, Long userId, ReplyKeyboardMarkup keyboardMarkup);
 }
