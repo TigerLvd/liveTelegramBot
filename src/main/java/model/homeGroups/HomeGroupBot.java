@@ -89,7 +89,7 @@ public class HomeGroupBot extends TelegramLongPollingBot {
                 return;
             }
 
-            if (null == user.getHomeGroup()) {
+            if (!user.hasHomeGroup() && !user.isAdmin()) {
                 // когда ввёл пароль, но пользователя ещё не добавили в БД:
                 homeGroupBotFacade.send(chatId, "Пользователь был добавлен, информация обрабатывается, функционал пока не доступен.");
                 return;
@@ -98,7 +98,11 @@ public class HomeGroupBot extends TelegramLongPollingBot {
             ReplyKeyboardMarkup keyboardMarkup;
 
             if (user.isAdmin()) {
-                keyboardMarkup = new CustomKeyboardMarkup(USER_FIELD, TO_INPUT_STAT_INFO_FIELD, EMPTY_STAT_INFO_FIELD, ENTERED_STAT_INFO_FIELD, ALERT_SETTINGS_FIELD, HOME_GROUPS_LIST_FIELD, NEW_USERS_LIST_FIELD, INFO_ABOUT_FIELD);
+                if (user.hasHomeGroup()) {
+                    keyboardMarkup = new CustomKeyboardMarkup(USER_FIELD, TO_INPUT_STAT_INFO_FIELD, EMPTY_STAT_INFO_FIELD, ENTERED_STAT_INFO_FIELD, ALERT_SETTINGS_FIELD, HOME_GROUPS_LIST_FIELD, NEW_USERS_LIST_FIELD, INFO_ABOUT_FIELD);
+                } else {
+                    keyboardMarkup = new CustomKeyboardMarkup(USER_FIELD, HOME_GROUPS_LIST_FIELD, NEW_USERS_LIST_FIELD, INFO_ABOUT_FIELD);
+                }
             } else {
                 keyboardMarkup = new CustomKeyboardMarkup(TO_INPUT_STAT_INFO_FIELD, EMPTY_STAT_INFO_FIELD, ENTERED_STAT_INFO_FIELD, ALERT_SETTINGS_FIELD, HOME_GROUPS_LIST_FIELD);
             }
@@ -172,7 +176,8 @@ public class HomeGroupBot extends TelegramLongPollingBot {
                     return;
                 }
                 if (INFO_ABOUT_FIELD2.equals(text)) {
-                    homeGroupBotFacade.send(chatId, INFO_ABOUT_FIELD, keyboardMarkup);
+                    homeGroupBotFacade.send(chatId, "Введите: " + INFO_ABOUT_FIELD
+                            + "<id пользователя> (id пользователей можно посмотреть в списке пользователей - нопка \"Пользователи\")" , keyboardMarkup);
                     return;
                 }
             }

@@ -43,11 +43,9 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
             for (User usr : allUsers) {
                 userInfos.append(i);
                 userInfos.append(") ");
-                if (usr.isAdmin()) {
-                    userInfos.append("admin=");
-                    userInfos.append(usr.isAdmin());
-                    userInfos.append(", ");
-                }
+                userInfos.append("admin=");
+                userInfos.append(usr.isAdmin());
+                userInfos.append(", ");
                 userInfos.append("id=");
                 userInfos.append(usr.getId());
                 userInfos.append(", chatId=");
@@ -80,16 +78,14 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
         if (null != allUsers) {
             int i= 1;
             for (User usr : allUsers) {
-                if (usr.getHomeGroup() != null) {
+                if (usr.hasHomeGroup() || usr.isAdmin()) {
                     continue;
                 }
                 userInfos.append(i);
                 userInfos.append(") ");
-                if (usr.isAdmin()) {
-                    userInfos.append("admin=");
-                    userInfos.append(usr.isAdmin());
-                    userInfos.append(", ");
-                }
+                userInfos.append("admin=");
+                userInfos.append(usr.isAdmin());
+                userInfos.append(", ");
                 userInfos.append("id=");
                 userInfos.append(usr.getId());
                 userInfos.append(", chatId=");
@@ -393,11 +389,9 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
         User userInfo = userService.findById(userId);
         if (null != userInfo) {
             StringBuilder userInfos = new StringBuilder();
-            if (userInfo.isAdmin()) {
-                userInfos.append("admin=");
-                userInfos.append(userInfo.isAdmin());
-                userInfos.append(", ");
-            }
+            userInfos.append("admin=");
+            userInfos.append(userInfo.isAdmin());
+            userInfos.append(", ");
             userInfos.append("id=");
             userInfos.append(userInfo.getId());
             userInfos.append(", chatId=");
@@ -412,7 +406,7 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
             userInfos.append(userInfo.getComment());
             userInfos.append(", isLeader=");
             userInfos.append(userInfo.isLeader());
-            if (null != userInfo.getHomeGroup()) {
+            if (userInfo.hasHomeGroup()) {
                 userInfos.append("\n\nВведено статистики:\n\n");
                 List<StatInfo> allStatInfos = statInfoService.findAllByHomeGroupId(userInfo.getHomeGroup().getId());
                 if (null != allStatInfos && !allStatInfos.isEmpty()) {

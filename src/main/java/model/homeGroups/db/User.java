@@ -141,4 +141,8 @@ public class User {
                 (comment == null ? "" : ", comment='" + comment + "'") +
                 '}';
     }
+
+    public boolean hasHomeGroup() {
+        return getHomeGroup() != null;
+    }
 }
