@@ -108,8 +108,10 @@ public class HomeGroupBot extends TelegramLongPollingBot {
             }
 
             if (TO_INPUT_STAT_INFO_FIELD.equals(text)) {
-                String msg = "Введите информацию в формате: Статистика: дд.мм.гг количество. Например:\nСтатистика: 01.02.19 987";
+                String msg = "Введите информацию в формате: Статистика: дд.мм.гг количество. Например:";
+                String msg2 = "Статистика: " + getStringOfDate(new Date()) + " 5";
                 homeGroupBotFacade.send(chatId, msg, keyboardMarkup);
+                homeGroupBotFacade.send(chatId, msg2, keyboardMarkup);
                 return;
             }
 
@@ -122,16 +124,20 @@ public class HomeGroupBot extends TelegramLongPollingBot {
 
                     date = getDate(sbStr[0], sbStr[1], sbStr[2]);
                 } catch (Exception e) {
-                    String msg = "Не верный формат! Ввести информацию в формате: Статистика: ДД.ММ.ГГ количество. Например:\nСтатистика: 01.02.19 987";
+                    String msg = "Не верный формат! Ввести информацию в формате: Статистика: ДД.ММ.ГГ количество. Например:";
+                    String msg2 = "Статистика: " + getStringOfDate(new Date()) + " 5";
                     homeGroupBotFacade.send(chatId, msg, keyboardMarkup);
+                    homeGroupBotFacade.send(chatId, msg2, keyboardMarkup);
                     return;
                 }
                 Integer count;
                 try {
                     count = new Integer(str[2]);
                 } catch (Exception e) {
-                    String msg = "Не верный формат! Ввести информацию в формате: Статистика: дд.мм.гг КОЛИЧЕСТВО. Например:\nСтатистика: 01.02.19 987";
+                    String msg = "Не верный формат! Ввести информацию в формате: Статистика: дд.мм.гг КОЛИЧЕСТВО. Например:";
+                    String msg2 = "Статистика: " + getStringOfDate(new Date()) + " 5";
                     homeGroupBotFacade.send(chatId, msg, keyboardMarkup);
+                    homeGroupBotFacade.send(chatId, msg2, keyboardMarkup);
                     return;
                 }
 
@@ -176,8 +182,9 @@ public class HomeGroupBot extends TelegramLongPollingBot {
                     return;
                 }
                 if (INFO_ABOUT_FIELD2.equals(text)) {
-                    homeGroupBotFacade.send(chatId, "Введите: " + INFO_ABOUT_FIELD
-                            + "<id пользователя> (id пользователей можно посмотреть в списке пользователей - нопка \"Пользователи\")" , keyboardMarkup);
+                    homeGroupBotFacade.send(chatId, "Введите команду в формате: " + INFO_ABOUT_FIELD
+                            + "<id пользователя> (id пользователей можно посмотреть в списке пользователей - нопка \"Пользователи\"). Например:" , keyboardMarkup);
+                    homeGroupBotFacade.send(chatId, INFO_ABOUT_FIELD + user.getId() , keyboardMarkup);
                     return;
                 }
             }
