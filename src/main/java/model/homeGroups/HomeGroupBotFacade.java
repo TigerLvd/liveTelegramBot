@@ -35,4 +35,6 @@ public interface HomeGroupBotFacade {
     void setBot(TelegramLongPollingBot homeGroupBot);
 
     void sendInfoAbout(Long chatId, Long userId, ReplyKeyboardMarkup keyboardMarkup);
+
+    void sendAllLostStatInfo(Long chatId, ReplyKeyboardMarkup keyboardMarkup);
 }

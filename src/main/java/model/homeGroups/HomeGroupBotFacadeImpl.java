@@ -162,6 +162,46 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
 
     @Override
     public void sendLostStatInfos(Long chatId, User user, ReplyKeyboardMarkup keyboardMarkup, Boolean sendEmpty) {
+        List<Date> lostWeeks = getLostWeeks(user);
+
+        if (lostWeeks.isEmpty()) {
+            if (!sendEmpty) {
+                return;
+            }
+            send(chatId, "Все данные введены, задолженностей нет", keyboardMarkup);
+        } else {
+            StringBuilder result = new StringBuilder("Нет информации за следующие недели:\n");
+            int i = 1;
+            for (Date monday : lostWeeks) {
+                result.append(i);
+                result.append(") ");
+                result.append(getMndToSunString(monday));
+                result.append("\n");
+
+                i++;
+            }
+
+            send(chatId, result.toString(), keyboardMarkup);
+        }
+    }
+
+    /**
+     * @param monday понедельник, от которого идёт отсчёт.
+     * @return строка в формате: "<понедельник>-<воскресенье>"
+     */
+    private String getMndToSunString(Date monday) {
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(monday);
+        calendar.add(Calendar.DAY_OF_MONTH, 6);
+        return getStringOfDate(monday) + "-" + getStringOfDate(calendar.getTime());
+    }
+
+    /**
+     * @param user пользователь по которому ищется информация
+     * @return список понедельников у недель, где не было внесено информации о статистике, начиная с даты
+     * включения ячейки в систему.
+     */
+    private List<Date> getLostWeeks(User user) {
         Map<Date, StatInfo> statInfoByFirstDayOfWeek = getStatInfoByFirstDayOfWeek(user);
         Calendar start = getStartDate(user);
         List<Date> lostWeeks = new ArrayList<Date>();
@@ -171,32 +211,7 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
             }
             start.add(Calendar.DAY_OF_MONTH, 7);
         }
-
-        if (lostWeeks.isEmpty()) {
-            if (!sendEmpty) {
-                return;
-            }
-            send(chatId, "Все данные введены, задолженностей нет", keyboardMarkup);
-        } else {
-            StringBuilder stringBuilder = new StringBuilder("Нет информации за следующие недели:\n");
-            int i = 1;
-            for (Date monday : lostWeeks) {
-                stringBuilder.append(i);
-                stringBuilder.append(") ");
-                stringBuilder.append(getStringOfDate(monday));
-                stringBuilder.append("-");
-
-                Calendar calendar = new GregorianCalendar();
-                calendar.setTime(monday);
-                calendar.add(Calendar.DAY_OF_MONTH, 6);
-                stringBuilder.append(getStringOfDate(calendar.getTime()));
-                stringBuilder.append("\n");
-
-                i++;
-            }
-
-            send(chatId, stringBuilder.toString(), keyboardMarkup);
-        }
+        return lostWeeks;
     }
 
     @Override
@@ -428,5 +443,33 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
         } else {
             send(chatId, "Нет пользователя с указанным id", keyboardMarkup);
         }
+    }
+
+    @Override
+    public void sendAllLostStatInfo(Long chatId, ReplyKeyboardMarkup keyboardMarkup) {
+        List<User> users = userService.findAll();
+        StringBuilder result = new StringBuilder();
+        for (User user : users) {
+            if (user.hasHomeGroup()) {
+                List<Date> lostWeeks = getLostWeeks(user);
+
+                if (!lostWeeks.isEmpty()) {
+                    result.append("У пользователя ");
+                    result.append(user.getComment());
+                    result.append(" нет информации за следующие недели:\n");
+                    int i = 1;
+                    for (Date monday : lostWeeks) {
+                        result.append(i);
+                        result.append(") ");
+                        result.append(getMndToSunString(monday));
+                        result.append("\n");
+
+                        i++;
+                    }
+                    result.append("\n");
+                }
+            }
+        }
+        send(chatId, result.toString(), keyboardMarkup);
     }
 }

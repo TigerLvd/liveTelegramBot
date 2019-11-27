@@ -37,6 +37,7 @@ public class HomeGroupBot extends TelegramLongPollingBot {
     private final static String NEW_USERS_LIST_FIELD = "Новые пользователи";
     private final static String INFO_ABOUT_FIELD = "Инфа по ";
     private final static String INFO_ABOUT_FIELD2 = "Инфа по";
+    private final static String EMPTY_USERS_STAT_INFO_FIELD = "Не заполнено у пользователей";
 
     public HomeGroupBot(String botToken, String botName, Long adminId, DefaultBotOptions options) {
         super(options);
@@ -99,7 +100,7 @@ public class HomeGroupBot extends TelegramLongPollingBot {
 
             if (user.isAdmin()) {
                 if (user.hasHomeGroup()) {
-                    keyboardMarkup = new CustomKeyboardMarkup(USER_FIELD, TO_INPUT_STAT_INFO_FIELD, EMPTY_STAT_INFO_FIELD, ENTERED_STAT_INFO_FIELD, ALERT_SETTINGS_FIELD, HOME_GROUPS_LIST_FIELD, NEW_USERS_LIST_FIELD, INFO_ABOUT_FIELD);
+                    keyboardMarkup = new CustomKeyboardMarkup(USER_FIELD, TO_INPUT_STAT_INFO_FIELD, EMPTY_STAT_INFO_FIELD, ENTERED_STAT_INFO_FIELD, ALERT_SETTINGS_FIELD, HOME_GROUPS_LIST_FIELD, NEW_USERS_LIST_FIELD, INFO_ABOUT_FIELD, EMPTY_USERS_STAT_INFO_FIELD);
                 } else {
                     keyboardMarkup = new CustomKeyboardMarkup(USER_FIELD, HOME_GROUPS_LIST_FIELD, NEW_USERS_LIST_FIELD, INFO_ABOUT_FIELD);
                 }
@@ -107,59 +108,61 @@ public class HomeGroupBot extends TelegramLongPollingBot {
                 keyboardMarkup = new CustomKeyboardMarkup(TO_INPUT_STAT_INFO_FIELD, EMPTY_STAT_INFO_FIELD, ENTERED_STAT_INFO_FIELD, ALERT_SETTINGS_FIELD, HOME_GROUPS_LIST_FIELD);
             }
 
-            if (TO_INPUT_STAT_INFO_FIELD.equals(text)) {
-                String msg = "Введите информацию в формате: Статистика: дд.мм.гг количество. Например:";
-                String msg2 = "Статистика: " + getStringOfDate(new Date()) + " 5";
-                homeGroupBotFacade.send(chatId, msg, keyboardMarkup);
-                homeGroupBotFacade.send(chatId, msg2, keyboardMarkup);
-                return;
-            }
-
-            if (text.startsWith("Статистика: ")) {
-                String[] str;
-                Date date;
-                try {
-                    str = text.split(" ");
-                    String[] sbStr = str[1].split("\\.");
-
-                    date = getDate(sbStr[0], sbStr[1], sbStr[2]);
-                } catch (Exception e) {
-                    String msg = "Не верный формат! Ввести информацию в формате: Статистика: ДД.ММ.ГГ количество. Например:";
-                    String msg2 = "Статистика: " + getStringOfDate(new Date()) + " 5";
-                    homeGroupBotFacade.send(chatId, msg, keyboardMarkup);
-                    homeGroupBotFacade.send(chatId, msg2, keyboardMarkup);
-                    return;
-                }
-                Integer count;
-                try {
-                    count = new Integer(str[2]);
-                } catch (Exception e) {
-                    String msg = "Не верный формат! Ввести информацию в формате: Статистика: дд.мм.гг КОЛИЧЕСТВО. Например:";
+            if (user.hasHomeGroup()) {
+                if (TO_INPUT_STAT_INFO_FIELD.equals(text)) {
+                    String msg = "Введите информацию в формате: Статистика: дд.мм.гг количество. Например:";
                     String msg2 = "Статистика: " + getStringOfDate(new Date()) + " 5";
                     homeGroupBotFacade.send(chatId, msg, keyboardMarkup);
                     homeGroupBotFacade.send(chatId, msg2, keyboardMarkup);
                     return;
                 }
 
-                StatInfo statInfo = homeGroupBotFacade.addStatInfo(chatId, user, date, count);
+                if (text.startsWith("Статистика: ")) {
+                    String[] str;
+                    Date date;
+                    try {
+                        str = text.split(" ");
+                        String[] sbStr = str[1].split("\\.");
 
-                homeGroupBotFacade.send(chatId, "Получено: " + count + " за " + getStringOfDate(statInfo.getEventDate()), keyboardMarkup);
-                return;
-            }
+                        date = getDate(sbStr[0], sbStr[1], sbStr[2]);
+                    } catch (Exception e) {
+                        String msg = "Не верный формат! Ввести информацию в формате: Статистика: ДД.ММ.ГГ количество. Например:";
+                        String msg2 = "Статистика: " + getStringOfDate(new Date()) + " 5";
+                        homeGroupBotFacade.send(chatId, msg, keyboardMarkup);
+                        homeGroupBotFacade.send(chatId, msg2, keyboardMarkup);
+                        return;
+                    }
+                    Integer count;
+                    try {
+                        count = new Integer(str[2]);
+                    } catch (Exception e) {
+                        String msg = "Не верный формат! Ввести информацию в формате: Статистика: дд.мм.гг КОЛИЧЕСТВО. Например:";
+                        String msg2 = "Статистика: " + getStringOfDate(new Date()) + " 5";
+                        homeGroupBotFacade.send(chatId, msg, keyboardMarkup);
+                        homeGroupBotFacade.send(chatId, msg2, keyboardMarkup);
+                        return;
+                    }
 
-            if (EMPTY_STAT_INFO_FIELD.equals(text)) {
-                homeGroupBotFacade.sendLostStatInfos(chatId, user, keyboardMarkup, true);
-                return;
-            }
+                    StatInfo statInfo = homeGroupBotFacade.addStatInfo(chatId, user, date, count);
 
-            if (ENTERED_STAT_INFO_FIELD.equals(text)) {
-                homeGroupBotFacade.sendEnteredStatInfos(chatId, user, keyboardMarkup);
-                return;
-            }
+                    homeGroupBotFacade.send(chatId, "Получено: " + count + " за " + getStringOfDate(statInfo.getEventDate()), keyboardMarkup);
+                    return;
+                }
 
-            if (ALERT_SETTINGS_FIELD.equals(text)) {
-                sendNotificationSettings(chatId, user, null);
-                return;
+                if (EMPTY_STAT_INFO_FIELD.equals(text)) {
+                    homeGroupBotFacade.sendLostStatInfos(chatId, user, keyboardMarkup, true);
+                    return;
+                }
+
+                if (ENTERED_STAT_INFO_FIELD.equals(text)) {
+                    homeGroupBotFacade.sendEnteredStatInfos(chatId, user, keyboardMarkup);
+                    return;
+                }
+
+                if (ALERT_SETTINGS_FIELD.equals(text)) {
+                    sendNotificationSettings(chatId, user, null);
+                    return;
+                }
             }
 
             if (HOME_GROUPS_LIST_FIELD.equals(text)) {
@@ -167,7 +170,7 @@ public class HomeGroupBot extends TelegramLongPollingBot {
                 return;
             }
 
-            if (adminId.equals(user.getTelegramUserId())) {
+            if (user.isAdmin()) {
                 if (USER_FIELD.equals(text)) {
                     homeGroupBotFacade.sendUsersList(keyboardMarkup, adminId);
                     return;
@@ -185,6 +188,10 @@ public class HomeGroupBot extends TelegramLongPollingBot {
                     homeGroupBotFacade.send(chatId, "Введите команду в формате: " + INFO_ABOUT_FIELD
                             + "<id пользователя> (id пользователей можно посмотреть в списке пользователей - нопка \"Пользователи\"). Например:" , keyboardMarkup);
                     homeGroupBotFacade.send(chatId, INFO_ABOUT_FIELD + user.getId() , keyboardMarkup);
+                    return;
+                }
+                if (EMPTY_USERS_STAT_INFO_FIELD.equals(text)) {
+                    homeGroupBotFacade.sendAllLostStatInfo(chatId, keyboardMarkup);
                     return;
                 }
             }
