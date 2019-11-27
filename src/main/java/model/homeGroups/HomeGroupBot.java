@@ -102,7 +102,7 @@ public class HomeGroupBot extends TelegramLongPollingBot {
                 if (user.hasHomeGroup()) {
                     keyboardMarkup = new CustomKeyboardMarkup(USER_FIELD, TO_INPUT_STAT_INFO_FIELD, EMPTY_STAT_INFO_FIELD, ENTERED_STAT_INFO_FIELD, ALERT_SETTINGS_FIELD, HOME_GROUPS_LIST_FIELD, NEW_USERS_LIST_FIELD, INFO_ABOUT_FIELD, EMPTY_USERS_STAT_INFO_FIELD);
                 } else {
-                    keyboardMarkup = new CustomKeyboardMarkup(USER_FIELD, HOME_GROUPS_LIST_FIELD, NEW_USERS_LIST_FIELD, INFO_ABOUT_FIELD);
+                    keyboardMarkup = new CustomKeyboardMarkup(USER_FIELD, HOME_GROUPS_LIST_FIELD, NEW_USERS_LIST_FIELD, INFO_ABOUT_FIELD, EMPTY_USERS_STAT_INFO_FIELD);
                 }
             } else {
                 keyboardMarkup = new CustomKeyboardMarkup(TO_INPUT_STAT_INFO_FIELD, EMPTY_STAT_INFO_FIELD, ENTERED_STAT_INFO_FIELD, ALERT_SETTINGS_FIELD, HOME_GROUPS_LIST_FIELD);
