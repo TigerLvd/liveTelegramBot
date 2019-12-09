@@ -10,7 +10,7 @@ import model.homeGroups.dao.HomeGroupDaoService;
 import model.homeGroups.db.HomeGroup;
 
 public class HomeGroupServiceImpl implements HomeGroupService {
-    HomeGroupDaoService dao;
+    private HomeGroupDaoService dao;
 
     public HomeGroupDaoService getDao() {
         return dao;

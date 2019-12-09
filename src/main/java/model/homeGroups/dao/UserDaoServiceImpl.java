@@ -3,6 +3,7 @@ package model.homeGroups.dao;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
 
+import model.abstractdao.AbstractHibernateDao;
 import model.homeGroups.db.User;
 
 public class UserDaoServiceImpl extends AbstractHibernateDao<User> implements UserDaoService {

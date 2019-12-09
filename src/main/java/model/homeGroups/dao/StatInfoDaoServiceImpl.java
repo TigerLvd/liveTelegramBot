@@ -7,6 +7,7 @@ import org.hibernate.criterion.Restrictions;
 import java.util.Date;
 import java.util.List;
 
+import model.abstractdao.AbstractHibernateDao;
 import model.homeGroups.db.StatInfo;
 
 public class StatInfoDaoServiceImpl extends AbstractHibernateDao<StatInfo> implements StatInfoDaoService {

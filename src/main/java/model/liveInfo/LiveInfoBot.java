@@ -1,35 +1,43 @@
 package model.liveInfo;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
+import model.CustomKeyboardMarkup;
+import model.liveInfo.db.Field;
+import model.liveInfo.services.FieldService;
+
 public class LiveInfoBot extends TelegramLongPollingBot {
-    final int COLUMN_NUMBER = 2;
-    final boolean IS_CHANGE_CURRENT_MESSAGE = false;
 
     private String botToken;
     private String botName;
 
-    public LiveInfoBot(String botToken, String botName, DefaultBotOptions options) {
+    private FieldService fieldService;
+
+    public LiveInfoBot(String botToken, String botName, DefaultBotOptions options, FieldService fieldService) {
         super(options);
         this.botToken = botToken;
         this.botName = botName;
+        this.fieldService = fieldService;
     }
 
-    public LiveInfoBot(String botToken, String botName) {
+    public LiveInfoBot(String botToken, String botName, FieldService fieldService) {
         super();
         this.botToken = botToken;
         this.botName = botName;
+        this.fieldService = fieldService;
     }
 
     @Override
@@ -39,39 +47,6 @@ public class LiveInfoBot extends TelegramLongPollingBot {
             String text = update.getMessage().getText().toLowerCase();
 
             sendNewMessage(chatId, text);
-        } else if (update.hasCallbackQuery()) {
-            String callbackData = update.getCallbackQuery().getData();
-            Long chatId = update.getCallbackQuery().getMessage().getChatId();
-            Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
-
-            if (IS_CHANGE_CURRENT_MESSAGE) {
-                editCurrentMessage(callbackData, chatId, messageId);
-            } else {
-                sendNewMessage(chatId, callbackData);
-            }
-        }
-    }
-
-    private void editCurrentMessage(String callData, Long chatId, Integer messageId) {
-        if (callData == null || callData.isEmpty()) {
-            return;
-        }
-
-        Block block = Block.getByCode(callData);
-        if (null != block) {
-            editCurrentMessage(chatId, messageId, block);
-        } else {
-            Section section = Section.getByCode(callData);
-            if (null != section) {
-                editCurrentMessage(chatId, messageId, section);
-            } else {
-                Field field = Field.getByCode(callData);
-                if (null != field) {
-                    editCurrentMessage(chatId, messageId, field);
-                } else {
-                    editCurrentMessage(chatId, messageId, Block.GENERAL_MENU);
-                }
-            }
         }
     }
 
@@ -80,31 +55,48 @@ public class LiveInfoBot extends TelegramLongPollingBot {
             return;
         }
 
+        Field field = fieldService.findByName(text);
+        if (null == field) {
+            return;
+        }
+
         sendStartTestMessage(chatId, text);
 
-        Block block = Block.getByCode(text);
-        if (null != block) {
-            sendNewMessage(chatId, block);
-        } else {
-            Section section = Section.getByCode(text);
-            if (null != section) {
-                sendNewMessage(chatId, section);
-            } else {
-                Field field = Field.getByCode(text);
-                if (null != field) {
-                    sendNewMessage(chatId, field);
-                } else {
-                    sendNewMessage(chatId, Block.GENERAL_MENU);
+        List<Field> children = fieldService.findByParentId(field.getId());
+        List<String> keyNames = new ArrayList<String>(0);
+        if (null != children) {
+            keyNames.addAll(Collections2.transform(children, new Function<Field, String>() {
+                @Nullable
+                @Override
+                public String apply(Field field) {
+                    return field.getName();
                 }
-            }
+            }));
         }
-    }
+        addParents(field, keyNames);
+        addIfNoContains(keyNames, "Расписание");
+        addIfNoContains(keyNames, "Соц.сети");
+        addIfNoContains(keyNames, "Зимняя конференция");
 
-    private void sendStartTestMessage(Long chatId, String text) {
-        if (text.equals("/start")) {
+        CustomKeyboardMarkup keyboardMarkup = new CustomKeyboardMarkup(keyNames);
+        if (field.hasPhoto()) {
+            SendPhoto photo = new SendPhoto();
+            photo.setPhoto(new File(field.getPhotoPath()));
+            photo.setChatId(chatId);
+            photo.setCaption(field.getText() == null || field.getText().isEmpty() ? field.getName() : field.getText());
+            photo.setReplyMarkup(keyboardMarkup);
+            photo.setParseMode("html");
+            try {
+                execute(photo);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        } else {
             SendMessage message = new SendMessage()
                     .setChatId(chatId)
-                    .setText("Привет! Это чат бот и он пока на этапе тестирования!");
+                    .setText(field.getText() == null || field.getText().isEmpty() ? field.getName() : field.getText());
+            message.enableHtml(true);
+            message.setReplyMarkup(keyboardMarkup);
             try {
                 execute(message);
             } catch (TelegramApiException e) {
@@ -113,154 +105,29 @@ public class LiveInfoBot extends TelegramLongPollingBot {
         }
     }
 
-    private void editCurrentMessage(Long chatId, Integer messageId, Block block) {
-        EditMessageText message = new EditMessageText()
-                .setChatId(chatId)
-                .setMessageId(messageId)
-                .setText(block.getName());
-        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkup(block);
-        message.setReplyMarkup(markupInline);
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+    private void addParents(Field field, List<String> keyNames) {
+        Field parent = fieldService.findById(field.getParentId());
+        while (null != parent) {
+            addIfNoContains(keyNames, parent.getName());
+            parent = fieldService.findById(parent.getParentId());
         }
     }
 
-    private void editCurrentMessage(Long chatId, Integer messageId, Section section) {
-        EditMessageText message = new EditMessageText()
-                .setChatId(chatId)
-                .setMessageId(messageId)
-                .setText(section.getName());
-        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkup(section);
-        message.setReplyMarkup(markupInline);
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+    private void addIfNoContains(List<String> keyNames, String name) {
+        if (!keyNames.contains(name)) {
+            keyNames.add(name);
         }
     }
 
-    private void editCurrentMessage(Long chatId, Integer messageId, Field field) {
-        EditMessageText message = new EditMessageText()
-                .setChatId(chatId)
-                .setMessageId(messageId)
-                .setText(field.getName());
-        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkup(field);
-        message.setReplyMarkup(markupInline);
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void sendNewMessage(Long chatId, Field field) {
+    private void sendStartTestMessage(Long chatId, String text) {
         SendMessage message = new SendMessage()
                 .setChatId(chatId)
-                .setText(field.getName());
-        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkup(field);
-        message.setReplyMarkup(markupInline);
+                .setText("Привет! Это чат бот и он пока на этапе тестирования!");
         try {
             execute(message);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
-    }
-
-    private void sendNewMessage(Long chatId, Section section) {
-        SendMessage message = new SendMessage()
-                .setChatId(chatId)
-                .setText(section.getName());
-        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkup(section);
-        message.setReplyMarkup(markupInline);
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void sendNewMessage(Long chatId, Block block) {
-        SendMessage message = new SendMessage()
-                .setChatId(chatId)
-                .setText(block.getName());
-        InlineKeyboardMarkup markupInline = getInlineKeyboardMarkup(block);
-        message.setReplyMarkup(markupInline);
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private InlineKeyboardMarkup getInlineKeyboardMarkup(Section section) {
-        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<List<InlineKeyboardButton>>();
-        List<InlineKeyboardButton> rowInline = new ArrayList<InlineKeyboardButton>();
-
-        Iterator<Field> fieldIterator = section.getFields().iterator();
-        int i = 0;
-        while (fieldIterator.hasNext()) {
-            Field field = fieldIterator.next();
-            rowInline.add(new InlineKeyboardButton().setText(field.getName()).setCallbackData(field.getCode()));
-            i++;
-            if (i % COLUMN_NUMBER == 0) {
-                rowsInline.add(rowInline);
-                rowInline = new ArrayList<InlineKeyboardButton>();
-                i = 0;
-            }
-        }
-        if (!rowInline.isEmpty()) {
-            rowsInline.add(rowInline);
-            rowInline = new ArrayList<InlineKeyboardButton>();
-        }
-        Block block = section.getBlock();
-        rowInline.add(new InlineKeyboardButton().setText(block.getName()).setCallbackData(block.getCode()));
-        rowsInline.add(rowInline);
-
-        markupInline.setKeyboard(rowsInline);
-        return markupInline;
-    }
-
-    private InlineKeyboardMarkup getInlineKeyboardMarkup(Field field) {
-        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<List<InlineKeyboardButton>>();
-        List<InlineKeyboardButton> rowInline = new ArrayList<InlineKeyboardButton>();
-
-        Section section = field.getSection();
-        Block block = section.getBlock();
-        rowInline.add(new InlineKeyboardButton().setText(section.getName()).setCallbackData(section.getCode()));
-        rowInline.add(new InlineKeyboardButton().setText(block.getName()).setCallbackData(block.getCode()));
-        rowsInline.add(rowInline);
-
-        markupInline.setKeyboard(rowsInline);
-        return markupInline;
-    }
-
-    private InlineKeyboardMarkup getInlineKeyboardMarkup(Block block) {
-        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<List<InlineKeyboardButton>>();
-        List<InlineKeyboardButton> rowInline = new ArrayList<InlineKeyboardButton>();
-
-        Iterator<Section> sectionIterator = block.getSections().iterator();
-        int i = 0;
-        while (sectionIterator.hasNext()) {
-            Section section = sectionIterator.next();
-            rowInline.add(new InlineKeyboardButton().setText(section.getName()).setCallbackData(section.getCode()));
-            i++;
-            if (i % COLUMN_NUMBER == 0) {
-                rowsInline.add(rowInline);
-                rowInline = new ArrayList<InlineKeyboardButton>();
-                i = 0;
-            }
-        }
-        if (!rowsInline.isEmpty()) {
-            rowsInline.add(rowInline);
-        }
-
-        markupInline.setKeyboard(rowsInline);
-        return markupInline;
     }
 
     @Override

@@ -70,6 +70,16 @@
         <property name="persistentClass" value="model.homeGroups.db.HomeGroup"/>
     </bean>
 
+    <bean id="Field" class="model.liveInfo.db.Field" />
+
+    <bean id="FieldService" class="model.liveInfo.services.FieldServiceImpl">
+        <property name="dao" ref="FieldDaoService"/>
+    </bean>
+
+    <bean id="FieldDaoService" class="model.liveInfo.dao.FieldDaoServiceImpl" parent="AbstractHibernateDao">
+        <property name="persistentClass" value="model.liveInfo.db.Field"/>
+    </bean>
+
     <bean id="Scheduler" class="model.homeGroups.Scheduler">
         <property name="userService" ref="UserService"/>
         <property name="homeGroupBotFacade" ref="HomeGroupBotFacade"/>
@@ -87,7 +97,7 @@
 
     <task:scheduler id="printingScheduler" />
 
-    <bean id="AbstractHibernateDao" class="model.homeGroups.dao.AbstractHibernateDao"
+    <bean id="AbstractHibernateDao" class="model.abstractdao.AbstractHibernateDao"
           abstract="true">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>

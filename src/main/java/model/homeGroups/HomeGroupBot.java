@@ -39,30 +39,29 @@ public class HomeGroupBot extends TelegramLongPollingBot {
     private final static String INFO_ABOUT_FIELD2 = "Инфа по";
     private final static String EMPTY_USERS_STAT_INFO_FIELD = "Не заполнено у пользователей";
 
-    public HomeGroupBot(String botToken, String botName, Long adminId, DefaultBotOptions options) {
+    public HomeGroupBot(String botToken, String botName, Long adminId, DefaultBotOptions options, UserService userService,
+                        HomeGroupBotFacade homeGroupBotFacade) {
         super(options);
 
         this.botToken = botToken;
         this.botName = botName;
         this.adminId = adminId;
 
-        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("application-context.xml");
-        userService = (UserService) applicationContext.getBean("UserService");
-        homeGroupBotFacade = (HomeGroupBotFacade) applicationContext.getBean("HomeGroupBotFacade");
-        homeGroupBotFacade.setBot(this);
+        this.userService = userService;
+        this.homeGroupBotFacade = homeGroupBotFacade;
+        this.homeGroupBotFacade.setBot(this);
     }
 
-    public HomeGroupBot(String botToken, String botName, Long adminId) {
+    public HomeGroupBot(String botToken, String botName, Long adminId, UserService userService, HomeGroupBotFacade homeGroupBotFacade) {
         super();
 
         this.botToken = botToken;
         this.botName = botName;
         this.adminId = adminId;
 
-        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("application-context.xml");
-        userService = (UserService) applicationContext.getBean("UserService");
-        homeGroupBotFacade = (HomeGroupBotFacade) applicationContext.getBean("HomeGroupBotFacade");
-        homeGroupBotFacade.setBot(this);
+        this.userService = userService;
+        this.homeGroupBotFacade = homeGroupBotFacade;
+        this.homeGroupBotFacade.setBot(this);
     }
 
     @Override

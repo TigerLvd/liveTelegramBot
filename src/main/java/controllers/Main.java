@@ -1,5 +1,7 @@
 package controllers;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.ApiContext;
@@ -11,10 +13,16 @@ import java.io.IOException;
 import java.util.Properties;
 
 import model.homeGroups.HomeGroupBot;
+import model.homeGroups.HomeGroupBotFacade;
+import model.homeGroups.service.UserService;
+import model.liveInfo.LiveInfoBot;
+import model.liveInfo.services.FieldService;
 
 public class Main {
     private static String BOT_NAME;
     private static String BOT_TOKEN;
+    private static String BOT_NAME2;
+    private static String BOT_TOKEN2;
 
     private static String PROXY_HOST;
     private static Integer PROXY_PORT;
@@ -32,19 +40,30 @@ public class Main {
 
             DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class);
             HomeGroupBot bot;
+            LiveInfoBot bot2;
+
+            ApplicationContext applicationContext = new ClassPathXmlApplicationContext("application-context.xml");
+
+            UserService userService = (UserService) applicationContext.getBean("UserService");
+            HomeGroupBotFacade homeGroupBotFacade = (HomeGroupBotFacade) applicationContext.getBean("HomeGroupBotFacade");
+            FieldService fieldService = (FieldService) applicationContext.getBean("FieldService");
+
             if (Boolean.TRUE.equals(USE_PROXY)) {
                 // use PROXY
                 botOptions.setProxyHost(PROXY_HOST);
                 botOptions.setProxyPort(PROXY_PORT);
                 botOptions.setProxyType(DefaultBotOptions.ProxyType.SOCKS5);
 
-                bot = new HomeGroupBot(BOT_TOKEN, BOT_NAME, ADMIN_ID, botOptions);
+                bot = new HomeGroupBot(BOT_TOKEN, BOT_NAME, ADMIN_ID, botOptions, userService, homeGroupBotFacade);
+                bot2 = new LiveInfoBot(BOT_TOKEN2, BOT_NAME2, botOptions, fieldService);
             } else {
                 // use VPN
-                bot = new HomeGroupBot(BOT_TOKEN, BOT_NAME, ADMIN_ID);
+                bot = new HomeGroupBot(BOT_TOKEN, BOT_NAME, ADMIN_ID, userService, homeGroupBotFacade);
+                bot2 = new LiveInfoBot(BOT_TOKEN2, BOT_NAME2, fieldService);
             }
 
             botsApi.registerBot(bot);
+            botsApi.registerBot(bot2);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
@@ -61,6 +80,8 @@ public class Main {
 
             BOT_NAME = property.getProperty("bot_name");
             BOT_TOKEN = property.getProperty("bot_token");
+            BOT_NAME2 = property.getProperty("bot_name2");
+            BOT_TOKEN2 = property.getProperty("bot_token2");
 
             PROXY_HOST = property.getProperty("proxy_host");
             PROXY_PORT = new Integer(property.getProperty("proxy_port"));
@@ -68,6 +89,7 @@ public class Main {
             ADMIN_ID = new Long(property.getProperty("admin_id"));
 
             System.out.println("BOT_NAME: " + BOT_NAME
+                    + ", BOT_NAME2: " + BOT_NAME2
                     + ", PROXY_HOST: " + PROXY_HOST
                     + ", PROXY_PORT: " + PROXY_PORT);
 

@@ -12,5 +12,6 @@
     <mapping class="model.homeGroups.db.StatInfo"/>
     <mapping class="model.homeGroups.db.User"/>
     <mapping class="model.homeGroups.db.HomeGroup"/>
+    <mapping class="model.liveInfo.db.Field"/>
   </session-factory>
 </hibernate-configuration>

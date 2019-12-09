@@ -1,4 +1,4 @@
-package model.homeGroups.dao;
+package model.abstractdao;
 
 import org.hibernate.Session;
 
