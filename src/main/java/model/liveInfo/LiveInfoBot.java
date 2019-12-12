@@ -74,7 +74,7 @@ public class LiveInfoBot extends TelegramLongPollingBot {
             }));
         }
         addParents(field, keyNames);
-        addIfNoContains(keyNames, "Расписание");
+        addIfNoContains(keyNames, "Расписание мероприятий");
         addIfNoContains(keyNames, "Соц.сети");
         addIfNoContains(keyNames, "Зимняя конференция");
 
