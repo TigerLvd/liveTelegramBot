@@ -2,6 +2,7 @@ package model.homeGroups.db;
 
 import java.sql.Time;
 import java.util.Date;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -126,5 +127,24 @@ public class HomeGroup {
                 ", dayOfTheWeek=" + dayOfTheWeek.getTitle() +
                 ", time=" + time +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        HomeGroup homeGroup = (HomeGroup) o;
+        return Objects.equals(id, homeGroup.id) &&
+                Objects.equals(liederPhoneNumber, homeGroup.liederPhoneNumber) &&
+                Objects.equals(address, homeGroup.address) &&
+                dayOfTheWeek == homeGroup.dayOfTheWeek &&
+                Objects.equals(time, homeGroup.time) &&
+                Objects.equals(comment, homeGroup.comment) &&
+                Objects.equals(startDate, homeGroup.startDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, liederPhoneNumber, address, dayOfTheWeek, time, comment, startDate);
     }
 }

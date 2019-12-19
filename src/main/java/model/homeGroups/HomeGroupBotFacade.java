@@ -22,6 +22,8 @@ public interface HomeGroupBotFacade {
 
     void sendEnteredStatInfos(Long chatId, User user, ReplyKeyboardMarkup keyboardMarkup);
 
+    void sendFile(Long chatId, String path, ReplyKeyboardMarkup keyboard);
+
     void send(Long chatId, String str, ReplyKeyboardMarkup keyboard);
 
     void send(Long chatId, Integer messageId, String str, InlineKeyboardMarkup keyboard);
@@ -37,4 +39,6 @@ public interface HomeGroupBotFacade {
     void sendInfoAbout(Long chatId, Long userId, ReplyKeyboardMarkup keyboardMarkup);
 
     void sendAllLostStatInfo(Long chatId, ReplyKeyboardMarkup keyboardMarkup);
+
+    void downloadStatInfos(Long chatId, ReplyKeyboardMarkup keyboardMarkup);
 }

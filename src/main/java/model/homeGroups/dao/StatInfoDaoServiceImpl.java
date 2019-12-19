@@ -21,11 +21,11 @@ public class StatInfoDaoServiceImpl extends AbstractHibernateDao<StatInfo> imple
     }
 
     @Override
-    public StatInfo findByDateAndHomeGroupId(Date date, Long id) {
+    public StatInfo findByDateAndHomeGroupId(Date eventDate, Long homeGroupId) {
         Criteria criteria = getSession().createCriteria(getPersistentClass(), "st");
         criteria.createAlias("st.homeGroup", "hg");
-        criteria.add(Restrictions.eq("hg.id", id));
-        criteria.add(Restrictions.eq("st.eventDate", date));
+        criteria.add(Restrictions.eq("hg.id", homeGroupId));
+        criteria.add(Restrictions.eq("st.eventDate", eventDate));
         criteria.addOrder(Order.desc("st.saveDate"));
         criteria.setFirstResult(0);
         criteria.setMaxResults(1);

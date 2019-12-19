@@ -1,5 +1,7 @@
 package model.homeGroups.db;
 
+import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -144,5 +146,27 @@ public class User {
 
     public boolean hasHomeGroup() {
         return getHomeGroup() != null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return admin == user.admin &&
+                leader == user.leader &&
+                notificationEnabled == user.notificationEnabled &&
+                id.equals(user.id) &&
+                Objects.equals(firstName, user.firstName) &&
+                Objects.equals(lastName, user.lastName) &&
+                Objects.equals(homeGroup, user.homeGroup) &&
+                Objects.equals(nickName, user.nickName) &&
+                telegramUserId.equals(user.telegramUserId) &&
+                Objects.equals(comment, user.comment);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, admin, leader, firstName, lastName, homeGroup, nickName, telegramUserId, comment, notificationEnabled);
     }
 }

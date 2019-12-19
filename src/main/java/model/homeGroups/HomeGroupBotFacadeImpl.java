@@ -1,6 +1,14 @@
 package model.homeGroups;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -8,12 +16,16 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +45,8 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
     private StatInfoService statInfoService;
 
     private TelegramLongPollingBot bot;
+
+    private final String rootPath = "/";
 
     @Override
     public void sendUsersList(ReplyKeyboardMarkup keyboardMarkup, Long chatId) {
@@ -202,7 +216,7 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
      * включения ячейки в систему.
      */
     private List<Date> getLostWeeks(User user) {
-        Map<Date, StatInfo> statInfoByFirstDayOfWeek = getStatInfoByFirstDayOfWeek(user);
+        Map<Date, StatInfo> statInfoByFirstDayOfWeek = getMapStatInfoByFirstDayOfWeek(user.getHomeGroup().getId());
         Calendar start = getStartDate(user);
         List<Date> lostWeeks = new ArrayList<Date>();
         while (start.before(new GregorianCalendar())) {
@@ -236,9 +250,9 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
         }
     }
 
-    private Map<Date, StatInfo> getStatInfoByFirstDayOfWeek(User user) {
+    private Map<Date, StatInfo> getMapStatInfoByFirstDayOfWeek(Long homeGroupId) {
         Map<Date, StatInfo> statInfoByFirstDayOfWeek = new HashMap<Date, StatInfo>();
-        List<StatInfo> allStatInfos = statInfoService.findAllByHomeGroupId(user.getHomeGroup().getId());
+        List<StatInfo> allStatInfos = statInfoService.findAllByHomeGroupId(homeGroupId);
         if (null != allStatInfos) {
             for (StatInfo statInfo : allStatInfos) {
                 Date time = getFirstDayOfWeek(statInfo.getEventDate());
@@ -316,6 +330,20 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
         number.append(" ");
         number.append(str.substring(8, 10));
         return number.toString();
+    }
+
+    @Override
+    public void sendFile(Long chatId, String path, ReplyKeyboardMarkup keyboard) {
+        SendDocument document = new SendDocument()
+                .setChatId(chatId)
+                .setDocument(new File(rootPath + path))
+                .setReplyMarkup(keyboard);
+        try {
+            bot.execute(document);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+            send(chatId, "Системная ошибка", keyboard);
+        }
     }
 
     @Override
@@ -471,5 +499,120 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
             }
         }
         send(chatId, result.toString(), keyboardMarkup);
+    }
+
+    @Override
+    public void downloadStatInfos(Long chatId, ReplyKeyboardMarkup keyboardMarkup) {
+        send(chatId, "Сбор информации, формирование файла...", keyboardMarkup);
+        try {
+            List<HomeGroup> homeGroups = homeGroupService.findAll();
+            Map<Date, Map<HomeGroup, StatInfo>> map = new HashMap<>();
+            if (homeGroups != null && !homeGroups.isEmpty()) {
+                for (HomeGroup homeGroup : homeGroups) {
+                    Date day = getStartYearDate();
+                    Map<Date, StatInfo> statInfoByFirstDayOfWeek = getMapStatInfoByFirstDayOfWeek(homeGroup.getId());
+                    while (day.before(new Date())) {
+                        map.computeIfAbsent(day, k -> new HashMap<>());
+                        map.get(day).put(homeGroup, statInfoByFirstDayOfWeek.getOrDefault(day, null));
+                        day = addDays(day, 7);
+                    }
+                }
+            }
+            String path = "statInfo.xsl";
+            writeIntoExcel(path, map);
+            sendFile(chatId, path, keyboardMarkup);
+        } catch (IOException e) {
+            send(chatId, "Системная ошибка", keyboardMarkup);
+            e.printStackTrace();
+        }
+    }
+
+    private Date getStartYearDate() {
+        Date firstDay = getFirstDayOfYear(new Date());
+        if (getDayOfWeek(firstDay) > 2) {
+            firstDay = addDays(firstDay, 7);
+        }
+        firstDay = getFirstDayOfWeek(firstDay);
+        return firstDay;
+    }
+
+    private Date addDays(Date firstDayOfYear, int operand) {
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(firstDayOfYear);
+        calendar.add(Calendar.DATE, operand);
+        return calendar.getTime();
+    }
+
+    private Date getFirstDayOfYear(Date date) {
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        calendar.set(Calendar.MONTH, Calendar.JANUARY);
+        calendar.set(Calendar.DATE, 1);
+        calendar.set(Calendar.HOUR, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
+    }
+
+    private Integer getDayOfWeek(Date date) {
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        if (dayOfWeek == 1) {
+            dayOfWeek = 7;
+        } else {
+            dayOfWeek--;
+        }
+        return dayOfWeek;
+    }
+
+    @SuppressWarnings("deprecation")
+    private static void writeIntoExcel(String path, Map<Date, Map<HomeGroup, StatInfo>> map) throws IOException {
+        Workbook book = new HSSFWorkbook();
+        Sheet sheet = book.createSheet("Статистика посещений ячеек");
+
+        Row headerRow = sheet.createRow(0);
+        Cell headerCell = headerRow.createCell(0);
+        headerCell.setCellValue("Яча\\Дата");
+
+        Iterator<Date> iterator = map.keySet().iterator();
+        Date firstDate = iterator.next();
+        for (HomeGroup homeGroup : map.get(firstDate).keySet()) {
+            Cell name = headerRow.createCell(homeGroup.getId().intValue());
+            name.setCellValue(homeGroup.getComment());
+        }
+        // Меняем размер столбца
+        sheet.autoSizeColumn(0);
+
+        int rowNumb = 1;
+        for (Date date : map.keySet()) {
+            Row row = sheet.createRow(rowNumb);
+
+            Cell dateCell = row.createCell(0);
+            DataFormat format = book.createDataFormat();
+            CellStyle dateStyle = book.createCellStyle();
+            dateStyle.setDataFormat(format.getFormat("dd.mm.yyyy"));
+            dateCell.setCellStyle(dateStyle);
+            dateCell.setCellValue(date);
+
+            for (HomeGroup homeGroup : map.get(date).keySet()) {
+                Cell stCell = row.createCell(homeGroup.getId().intValue());
+                StatInfo statInfo = map.get(date).get(homeGroup);
+                if (null != statInfo) {
+                    stCell.setCellValue(statInfo.getCount());
+                } else {
+                    stCell.setCellValue(0);
+                }
+            }
+            // Меняем размер столбца
+            sheet.autoSizeColumn(rowNumb);
+
+            rowNumb++;
+        }
+
+        // Записываем всё в файл
+        book.write(new FileOutputStream(path));
+        book.close();
     }
 }

@@ -38,6 +38,7 @@ public class HomeGroupBot extends TelegramLongPollingBot {
     private final static String INFO_ABOUT_FIELD = "Инфа по ";
     private final static String INFO_ABOUT_FIELD2 = "Инфа по";
     private final static String EMPTY_USERS_STAT_INFO_FIELD = "Не заполнено у пользователей";
+    private final static String DOWNLOAD_STAT_INFOS = "Скачать статистику в xsl";
 
     public HomeGroupBot(String botToken, String botName, Long adminId, DefaultBotOptions options, UserService userService,
                         HomeGroupBotFacade homeGroupBotFacade) {
@@ -99,9 +100,9 @@ public class HomeGroupBot extends TelegramLongPollingBot {
 
             if (user.isAdmin()) {
                 if (user.hasHomeGroup()) {
-                    keyboardMarkup = new CustomKeyboardMarkup(USER_FIELD, TO_INPUT_STAT_INFO_FIELD, EMPTY_STAT_INFO_FIELD, ENTERED_STAT_INFO_FIELD, ALERT_SETTINGS_FIELD, HOME_GROUPS_LIST_FIELD, NEW_USERS_LIST_FIELD, INFO_ABOUT_FIELD, EMPTY_USERS_STAT_INFO_FIELD);
+                    keyboardMarkup = new CustomKeyboardMarkup(USER_FIELD, TO_INPUT_STAT_INFO_FIELD, EMPTY_STAT_INFO_FIELD, ENTERED_STAT_INFO_FIELD, ALERT_SETTINGS_FIELD, HOME_GROUPS_LIST_FIELD, NEW_USERS_LIST_FIELD, INFO_ABOUT_FIELD, EMPTY_USERS_STAT_INFO_FIELD, DOWNLOAD_STAT_INFOS);
                 } else {
-                    keyboardMarkup = new CustomKeyboardMarkup(USER_FIELD, HOME_GROUPS_LIST_FIELD, NEW_USERS_LIST_FIELD, INFO_ABOUT_FIELD, EMPTY_USERS_STAT_INFO_FIELD);
+                    keyboardMarkup = new CustomKeyboardMarkup(USER_FIELD, HOME_GROUPS_LIST_FIELD, NEW_USERS_LIST_FIELD, INFO_ABOUT_FIELD, EMPTY_USERS_STAT_INFO_FIELD, DOWNLOAD_STAT_INFOS);
                 }
             } else {
                 keyboardMarkup = new CustomKeyboardMarkup(TO_INPUT_STAT_INFO_FIELD, EMPTY_STAT_INFO_FIELD, ENTERED_STAT_INFO_FIELD, ALERT_SETTINGS_FIELD, HOME_GROUPS_LIST_FIELD);
@@ -191,6 +192,10 @@ public class HomeGroupBot extends TelegramLongPollingBot {
                 }
                 if (EMPTY_USERS_STAT_INFO_FIELD.equals(text)) {
                     homeGroupBotFacade.sendAllLostStatInfo(chatId, keyboardMarkup);
+                    return;
+                }
+                if (DOWNLOAD_STAT_INFOS.equals(text)) {
+                    homeGroupBotFacade.downloadStatInfos(chatId, keyboardMarkup);
                     return;
                 }
             }
