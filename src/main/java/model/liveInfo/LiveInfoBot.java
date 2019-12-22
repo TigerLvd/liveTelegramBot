@@ -1,9 +1,7 @@
 package model.liveInfo;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -13,7 +11,9 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import model.CustomKeyboardMarkup;
 import model.liveInfo.db.Field;
@@ -61,24 +61,8 @@ public class LiveInfoBot extends TelegramLongPollingBot {
         }
 
         sendStartTestMessage(chatId, text);
+        CustomKeyboardMarkup keyboardMarkup = buildKeyboard(field);
 
-        List<Field> children = fieldService.findByParentId(field.getId());
-        List<String> keyNames = new ArrayList<String>(0);
-        if (null != children) {
-            keyNames.addAll(Collections2.transform(children, new Function<Field, String>() {
-                @Nullable
-                @Override
-                public String apply(Field field) {
-                    return field.getName();
-                }
-            }));
-        }
-        addParents(field, keyNames);
-        addIfNoContains(keyNames, "Расписание мероприятий");
-        addIfNoContains(keyNames, "Соц.сети");
-        addIfNoContains(keyNames, "Зимняя конференция");
-
-        CustomKeyboardMarkup keyboardMarkup = new CustomKeyboardMarkup(keyNames);
         if (field.hasPhoto()) {
             SendPhoto photo = new SendPhoto();
             photo.setPhoto(new File(field.getPhotoPath()));
@@ -105,12 +89,45 @@ public class LiveInfoBot extends TelegramLongPollingBot {
         }
     }
 
-    private void addParents(Field field, List<String> keyNames) {
-        Field parent = fieldService.findById(field.getParentId());
-        while (null != parent) {
-            addIfNoContains(keyNames, parent.getName());
-            parent = fieldService.findById(parent.getParentId());
+    private CustomKeyboardMarkup buildKeyboard(Field field) {
+        List<String> keyNames = new ArrayList<>();
+        List<Field> allFields = fieldService.findAll();
+
+        Map<Long, Field> fieldById = new HashMap<>();
+        for (Field currentField : allFields) {
+            fieldById.put(currentField.getId(), currentField);
         }
+
+        Map<Long, List<Field>> fieldsByParentId = new HashMap<>();
+        for (Field currentField : allFields) {
+            fieldsByParentId.computeIfAbsent(currentField.getParentId(), k -> new ArrayList<>());
+            fieldsByParentId.get(currentField.getParentId()).add(currentField);
+        }
+
+        List<Field> childes = fieldsByParentId.get(field.getId());
+        if (null != childes && !childes.isEmpty()) {
+            keyNames.addAll(Collections2.transform(childes, Field::getName));
+        }
+
+        if (null != field.parentId) {
+            Field vsp = fieldById.get(field.parentId);
+
+            List<Field> brothers = fieldsByParentId.get(vsp.getId());
+            if (null != brothers && !brothers.isEmpty()) {
+                keyNames.addAll(Collections2.transform(brothers, Field::getName));
+            }
+
+            while (null != vsp && null != vsp.parentId) {
+                addIfNoContains(keyNames, vsp.getName());
+                vsp = fieldById.get(vsp.parentId);
+            }
+        }
+
+        addIfNoContains(keyNames, "Расписание мероприятий на неделе");
+        addIfNoContains(keyNames, "Соц.сети");
+        addIfNoContains(keyNames, "Зимняя конференция");
+
+        return new CustomKeyboardMarkup(keyNames);
     }
 
     private void addIfNoContains(List<String> keyNames, String name) {

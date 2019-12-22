@@ -2,6 +2,7 @@ package model.liveInfo.services;
 
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -67,6 +68,9 @@ public class FieldServiceImpl implements FieldService {
     @Override
     @Transactional(readOnly = true)
     public List<Field> findByParentId(Long parentId) {
+        if (null == parentId) {
+            return new ArrayList<>();
+        }
         return getDao().findByParentId(parentId);
     }
 }
