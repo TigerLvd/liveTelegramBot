@@ -57,7 +57,7 @@ public class LiveInfoBot extends TelegramLongPollingBot {
 
         Field field = fieldService.findByName(text);
         if (null == field) {
-            return;
+            field = fieldService.findById(1L);
         }
 
         sendStartTestMessage(chatId, text);
@@ -109,25 +109,19 @@ public class LiveInfoBot extends TelegramLongPollingBot {
             keyNames.addAll(Collections2.transform(childes, Field::getName));
         }
 
-        if (null != field.parentId) {
-            Field vsp = fieldById.get(field.parentId);
+        if (null != field.getParentId()) {
+            Field vsp = fieldById.get(field.getParentId());
 
-            List<Field> brothers = fieldsByParentId.get(vsp.getId());
-            if (null != brothers && !brothers.isEmpty()) {
-                keyNames.addAll(Collections2.transform(brothers, Field::getName));
+            if (field.isShowBrothers()) {
+                List<Field> brothers = fieldsByParentId.get(vsp.getId());
+                if (null != brothers && !brothers.isEmpty()) {
+                    keyNames.addAll(Collections2.transform(brothers, Field::getName));
+                }
             }
-
-            while (null != vsp && null != vsp.parentId) {
-                addIfNoContains(keyNames, vsp.getName());
-                vsp = fieldById.get(vsp.parentId);
-            }
+            addIfNoContains(keyNames, "Главное меню");
         }
 
-        addIfNoContains(keyNames, "Расписание мероприятий на неделе");
-        addIfNoContains(keyNames, "Соц.сети");
-        addIfNoContains(keyNames, "Зимняя конференция");
-
-        return new CustomKeyboardMarkup(keyNames);
+        return new CustomKeyboardMarkup(keyNames, field.getColumnCount());
     }
 
     private void addIfNoContains(List<String> keyNames, String name) {

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CustomKeyboardMarkup extends ReplyKeyboardMarkup {
-    public static final Integer ROWS_SIZE = 2;
+    private static final Integer ROWS_SIZE = 2;
 
     public CustomKeyboardMarkup(String... keyNames) {
         List<KeyboardRow> keyboard = new ArrayList<KeyboardRow>();
@@ -25,11 +25,11 @@ public class CustomKeyboardMarkup extends ReplyKeyboardMarkup {
         this.setKeyboard(keyboard);
     }
 
-    public CustomKeyboardMarkup(List<String> keyNames) {
-        List<KeyboardRow> keyboard = new ArrayList<KeyboardRow>();
+    public CustomKeyboardMarkup(List<String> keyNames, Long columnCount) {
+        List<KeyboardRow> keyboard = new ArrayList<>();
         KeyboardRow row = new KeyboardRow();
         for (String keyName : keyNames) {
-            if (row.size() == ROWS_SIZE) {
+            if (row.size() == columnCount) {
                 keyboard.add(row);
                 row = new KeyboardRow();
             }

@@ -25,7 +25,11 @@ public class Field implements Serializable {
 
     private String photoPath;
 
-    public Long parentId;
+    private Long parentId;
+
+    private Long columnCount;
+
+    private boolean showBrothers;
 
     private List<Field> childes;
 
@@ -92,5 +96,23 @@ public class Field implements Serializable {
 
     public void setChildes(List<Field> childes) {
         this.childes = childes;
+    }
+
+    @Column(name = "COLUMN_COUNT")
+    public Long getColumnCount() {
+        return columnCount;
+    }
+
+    public void setColumnCount(Long columnCount) {
+        this.columnCount = columnCount;
+    }
+
+    @Column(name = "IS_SHOW_BROTHERS")
+    public boolean isShowBrothers() {
+        return showBrothers;
+    }
+
+    public void setShowBrothers(boolean showBrothers) {
+        this.showBrothers = showBrothers;
     }
 }
