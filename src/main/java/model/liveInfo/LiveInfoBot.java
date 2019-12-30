@@ -4,6 +4,7 @@ import com.google.common.collect.Collections2;
 
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.send.SendLocation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -83,6 +84,18 @@ public class LiveInfoBot extends TelegramLongPollingBot {
             message.setReplyMarkup(keyboardMarkup);
             try {
                 execute(message);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        }
+        if (field.getLatitude() != null) {
+            SendLocation location = new SendLocation()
+                    .setChatId(chatId)
+                    .setLongitude(field.getLongitude())
+                    .setLatitude(field.getLatitude())
+                    .setReplyMarkup(keyboardMarkup);
+            try {
+                execute(location);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }

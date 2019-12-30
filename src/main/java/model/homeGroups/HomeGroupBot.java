@@ -110,10 +110,13 @@ public class HomeGroupBot extends TelegramLongPollingBot {
 
             if (user.hasHomeGroup()) {
                 if (TO_INPUT_STAT_INFO_FIELD.equals(text)) {
-                    String msg = "Введите информацию в формате: Статистика: дд.мм.гг количество. Например:";
-                    String msg2 = "Статистика: " + getStringOfDate(new Date()) + " 5";
+                    String msg = "Введите информацию в формате: Статистика: дд.мм.гг количество.";
+                    String msg2 = "Обратите внимание, что слово \"<b>Статистика</b>\" и символ\"<b>:</b>\" должны быть в отправляемом сообщении!\n\n" +
+                            "Для удобства можно скопировать и изменить пример:";
+                    String msg3 = "Статистика: " + getStringOfDate(new Date()) + " 5";
                     homeGroupBotFacade.send(chatId, msg, keyboardMarkup);
                     homeGroupBotFacade.send(chatId, msg2, keyboardMarkup);
+                    homeGroupBotFacade.send(chatId, msg3, keyboardMarkup);
                     return;
                 }
 

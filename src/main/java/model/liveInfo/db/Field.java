@@ -33,6 +33,10 @@ public class Field implements Serializable {
 
     private List<Field> childes;
 
+    private Float longitude;
+
+    private Float latitude;
+
     public Field() {
     }
 
@@ -114,5 +118,23 @@ public class Field implements Serializable {
 
     public void setShowBrothers(boolean showBrothers) {
         this.showBrothers = showBrothers;
+    }
+
+    @Column(name = "LONGITUDE")
+    public Float getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Float longitude) {
+        this.longitude = longitude;
+    }
+
+    @Column(name = "LATITUDE")
+    public Float getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Float latitude) {
+        this.latitude = latitude;
     }
 }

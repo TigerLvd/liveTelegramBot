@@ -351,6 +351,7 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
         SendMessage message = new SendMessage()
                 .setChatId(chatId)
                 .setText(str)
+                .enableHtml(true)
                 .setReplyMarkup(keyboard);
         try {
             bot.execute(message);
@@ -365,6 +366,7 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
             SendMessage message = new SendMessage()
                     .setChatId(chatId)
                     .setText(str)
+                    .enableHtml(true)
                     .setReplyMarkup(keyboard);
             try {
                 bot.execute(message);
@@ -378,6 +380,7 @@ public class HomeGroupBotFacadeImpl implements HomeGroupBotFacade {
                 .setChatId(chatId)
                 .setMessageId(messageId)
                 .setText(str)
+                .enableHtml(true)
                 .setReplyMarkup(keyboard);
         try {
             bot.execute(message);
