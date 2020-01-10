@@ -17,12 +17,15 @@ import model.homeGroups.HomeGroupBotFacade;
 import model.homeGroups.service.UserService;
 import model.liveInfo.LiveInfoBot;
 import model.liveInfo.services.FieldService;
+import model.liveInfoAdmin.LiveInfoAdminBot;
 
 public class Main {
     private static String BOT_NAME;
     private static String BOT_TOKEN;
     private static String BOT_NAME2;
     private static String BOT_TOKEN2;
+    private static String BOT_NAME3;
+    private static String BOT_TOKEN3;
 
     private static String PROXY_HOST;
     private static Integer PROXY_PORT;
@@ -41,6 +44,7 @@ public class Main {
             DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class);
             HomeGroupBot bot;
             LiveInfoBot bot2;
+            LiveInfoAdminBot bot3;
 
             ApplicationContext applicationContext = new ClassPathXmlApplicationContext("application-context.xml");
 
@@ -56,14 +60,17 @@ public class Main {
 
                 bot = new HomeGroupBot(BOT_TOKEN, BOT_NAME, ADMIN_ID, botOptions, userService, homeGroupBotFacade);
                 bot2 = new LiveInfoBot(BOT_TOKEN2, BOT_NAME2, botOptions, fieldService);
+                bot3 = new LiveInfoAdminBot(BOT_TOKEN3, BOT_NAME3, botOptions, fieldService, ADMIN_ID);
             } else {
                 // use VPN
                 bot = new HomeGroupBot(BOT_TOKEN, BOT_NAME, ADMIN_ID, userService, homeGroupBotFacade);
                 bot2 = new LiveInfoBot(BOT_TOKEN2, BOT_NAME2, fieldService);
+                bot3 = new LiveInfoAdminBot(BOT_TOKEN3, BOT_NAME3, fieldService, ADMIN_ID);
             }
 
             botsApi.registerBot(bot);
             botsApi.registerBot(bot2);
+            botsApi.registerBot(bot3);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
@@ -82,6 +89,8 @@ public class Main {
             BOT_TOKEN = property.getProperty("bot_token");
             BOT_NAME2 = property.getProperty("bot_name2");
             BOT_TOKEN2 = property.getProperty("bot_token2");
+            BOT_NAME3 = property.getProperty("bot_name3");
+            BOT_TOKEN3 = property.getProperty("bot_token3");
 
             PROXY_HOST = property.getProperty("proxy_host");
             PROXY_PORT = new Integer(property.getProperty("proxy_port"));
@@ -90,6 +99,7 @@ public class Main {
 
             System.out.println("BOT_NAME: " + BOT_NAME
                     + ", BOT_NAME2: " + BOT_NAME2
+                    + ", BOT_NAME3: " + BOT_NAME3
                     + ", PROXY_HOST: " + PROXY_HOST
                     + ", PROXY_PORT: " + PROXY_PORT);
 

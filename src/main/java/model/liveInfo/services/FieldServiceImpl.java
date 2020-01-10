@@ -66,11 +66,98 @@ public class FieldServiceImpl implements FieldService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<Field> findByParentId(Long parentId) {
-        if (null == parentId) {
-            return new ArrayList<>();
-        }
-        return getDao().findByParentId(parentId);
+    @Transactional
+    public void updateText(Long id, String textValue) {
+        if (id == null) return;
+
+        Field field = getDao().findById(id);
+        if (field == null) return;
+
+        field.setText(textValue);
+        getDao().saveOrUpdate(field);
+    }
+
+    @Override
+    @Transactional
+    public void updateParentId(Long id, Long parentId) {
+        if (id == null) return;
+
+        Field field = getDao().findById(id);
+        if (field == null) return;
+
+        field.setParentId(parentId);
+        getDao().saveOrUpdate(field);
+    }
+
+    @Override
+    @Transactional
+    public void updateName(Long id, String nameValue) {
+        if (id == null) return;
+
+        Field field = getDao().findById(id);
+        if (field == null) return;
+
+        field.setName(nameValue);
+        getDao().saveOrUpdate(field);
+    }
+
+    @Override
+    @Transactional
+    public void updateLatitude(Long id, Float latitude) {
+        if (id == null) return;
+
+        Field field = getDao().findById(id);
+        if (field == null) return;
+
+        field.setLatitude(latitude);
+        getDao().saveOrUpdate(field);
+    }
+
+    @Override
+    @Transactional
+    public void updateLongitude(Long id, Float longitude) {
+        if (id == null) return;
+
+        Field field = getDao().findById(id);
+        if (field == null) return;
+
+        field.setLongitude(longitude);
+        getDao().saveOrUpdate(field);
+    }
+
+    @Override
+    @Transactional
+    public void updatePhotoPath(Long id, String photoPath) {
+        if (id == null) return;
+
+        Field field = getDao().findById(id);
+        if (field == null) return;
+
+        field.setPhotoPath(photoPath);
+        getDao().saveOrUpdate(field);
+    }
+
+    @Override
+    @Transactional
+    public void updateColumnCount(Long id, Long columnCount) {
+        if (id == null) return;
+
+        Field field = getDao().findById(id);
+        if (field == null) return;
+
+        field.setColumnCount(columnCount);
+        getDao().saveOrUpdate(field);
+    }
+
+    @Override
+    @Transactional
+    public void updateIsShowBrothers(Long id, boolean isShowBrothers) {
+        if (id == null) return;
+
+        Field field = getDao().findById(id);
+        if (field == null) return;
+
+        field.setShowBrothers(isShowBrothers);
+        getDao().saveOrUpdate(field);
     }
 }

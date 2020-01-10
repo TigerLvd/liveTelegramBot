@@ -61,7 +61,6 @@ public class LiveInfoBot extends TelegramLongPollingBot {
             field = fieldService.findById(1L);
         }
 
-        sendStartTestMessage(chatId, text);
         CustomKeyboardMarkup keyboardMarkup = buildKeyboard(field);
 
         if (field.hasPhoto()) {
