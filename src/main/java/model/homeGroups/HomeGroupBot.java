@@ -1,7 +1,5 @@
 package model.homeGroups;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -14,7 +12,22 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.regex.Pattern;
 
+import model.homeGroups.chain.AlertSettingsChain;
+import model.homeGroups.chain.Chain;
+import model.homeGroups.chain.DownloadStatInfosChain;
+import model.homeGroups.chain.EmptyStatInfoDaysChain;
+import model.homeGroups.chain.EmptyUsersStatInfoDaysChain;
+import model.homeGroups.chain.EntedStatInfoChain;
+import model.homeGroups.chain.ExampleInfoAboutChain;
+import model.homeGroups.chain.ExampleInputStatInfoChain;
+import model.homeGroups.chain.HomeGroupListChain;
+import model.homeGroups.chain.InfoAboutChain;
+import model.homeGroups.chain.InputStatInfoChain;
+import model.homeGroups.chain.NewUsersChain;
+import model.homeGroups.chain.SendByChain;
+import model.homeGroups.chain.UsersChain;
 import model.homeGroups.db.StatInfo;
 import model.homeGroups.db.User;
 import model.homeGroups.service.UserService;
@@ -29,6 +42,7 @@ public class HomeGroupBot extends TelegramLongPollingBot {
     private UserService userService;
 
     private final static String TO_INPUT_STAT_INFO_FIELD = "Ввод статистики";
+    private final static String INPUT_STAT_INFO_BY_FIELD = "Ввод за";
     private final static String ENTERED_STAT_INFO_FIELD = "Введено статистики";
     private final static String USER_FIELD = "Пользователи";
     private final static String EMPTY_STAT_INFO_FIELD = "Не заполнено";
@@ -39,6 +53,24 @@ public class HomeGroupBot extends TelegramLongPollingBot {
     private final static String INFO_ABOUT_FIELD2 = "Инфа по";
     private final static String EMPTY_USERS_STAT_INFO_FIELD = "Не заполнено у пользователей";
     private final static String DOWNLOAD_STAT_INFOS = "Скачать статистику в xsl";
+
+    Chain chain;
+
+    public void fillChains() {
+        chain = new AlertSettingsChain()
+                .add(new DownloadStatInfosChain())
+                .add(new EmptyStatInfoDaysChain())
+                .add(new EmptyUsersStatInfoDaysChain())
+                .add(new EntedStatInfoChain())
+                .add(new ExampleInfoAboutChain())
+                .add(new ExampleInputStatInfoChain())
+                .add(new HomeGroupListChain())
+                .add(new InfoAboutChain())
+                .add(new InputStatInfoChain())
+                .add(new NewUsersChain())
+                .add(new SendByChain())
+                .add(new UsersChain());
+    }
 
     public HomeGroupBot(String botToken, String botName, Long adminId, DefaultBotOptions options, UserService userService,
                         HomeGroupBotFacade homeGroupBotFacade) {
@@ -51,6 +83,8 @@ public class HomeGroupBot extends TelegramLongPollingBot {
         this.userService = userService;
         this.homeGroupBotFacade = homeGroupBotFacade;
         this.homeGroupBotFacade.setBot(this);
+
+        fillChains();
     }
 
     public HomeGroupBot(String botToken, String botName, Long adminId, UserService userService, HomeGroupBotFacade homeGroupBotFacade) {
@@ -63,6 +97,8 @@ public class HomeGroupBot extends TelegramLongPollingBot {
         this.userService = userService;
         this.homeGroupBotFacade = homeGroupBotFacade;
         this.homeGroupBotFacade.setBot(this);
+
+        fillChains();
     }
 
     @Override
@@ -100,107 +136,21 @@ public class HomeGroupBot extends TelegramLongPollingBot {
 
             if (user.isAdmin()) {
                 if (user.hasHomeGroup()) {
-                    keyboardMarkup = new CustomKeyboardMarkup(USER_FIELD, TO_INPUT_STAT_INFO_FIELD, EMPTY_STAT_INFO_FIELD, ENTERED_STAT_INFO_FIELD, ALERT_SETTINGS_FIELD, HOME_GROUPS_LIST_FIELD, NEW_USERS_LIST_FIELD, INFO_ABOUT_FIELD, EMPTY_USERS_STAT_INFO_FIELD, DOWNLOAD_STAT_INFOS);
+                    keyboardMarkup = new CustomKeyboardMarkup(USER_FIELD, TO_INPUT_STAT_INFO_FIELD, EMPTY_STAT_INFO_FIELD, ENTERED_STAT_INFO_FIELD, ALERT_SETTINGS_FIELD, HOME_GROUPS_LIST_FIELD, NEW_USERS_LIST_FIELD, INFO_ABOUT_FIELD, EMPTY_USERS_STAT_INFO_FIELD, DOWNLOAD_STAT_INFOS, INPUT_STAT_INFO_BY_FIELD);
                 } else {
-                    keyboardMarkup = new CustomKeyboardMarkup(USER_FIELD, HOME_GROUPS_LIST_FIELD, NEW_USERS_LIST_FIELD, INFO_ABOUT_FIELD, EMPTY_USERS_STAT_INFO_FIELD, DOWNLOAD_STAT_INFOS);
+                    keyboardMarkup = new CustomKeyboardMarkup(USER_FIELD, HOME_GROUPS_LIST_FIELD, NEW_USERS_LIST_FIELD, INFO_ABOUT_FIELD, EMPTY_USERS_STAT_INFO_FIELD, DOWNLOAD_STAT_INFOS, INPUT_STAT_INFO_BY_FIELD);
                 }
             } else {
                 keyboardMarkup = new CustomKeyboardMarkup(TO_INPUT_STAT_INFO_FIELD, EMPTY_STAT_INFO_FIELD, ENTERED_STAT_INFO_FIELD, ALERT_SETTINGS_FIELD, HOME_GROUPS_LIST_FIELD);
             }
 
-            if (user.hasHomeGroup()) {
-                if (TO_INPUT_STAT_INFO_FIELD.equals(text)) {
-                    String msg = "Введите информацию в формате: Статистика: дд.мм.гг количество.";
-                    String msg2 = "Обратите внимание, что слово \"<b>Статистика</b>\" и символ\"<b>:</b>\" должны быть в отправляемом сообщении!\n\n" +
-                            "Для удобства можно скопировать и изменить пример:";
-                    String msg3 = "Статистика: " + getStringOfDate(new Date()) + " 5";
-                    homeGroupBotFacade.send(chatId, msg, keyboardMarkup);
-                    homeGroupBotFacade.send(chatId, msg2, keyboardMarkup);
-                    homeGroupBotFacade.send(chatId, msg3, keyboardMarkup);
-                    return;
-                }
-
-                if (text.startsWith("Статистика: ")) {
-                    String[] str;
-                    Date date;
-                    try {
-                        str = text.split(" ");
-                        String[] sbStr = str[1].split("\\.");
-
-                        date = getDate(sbStr[0], sbStr[1], sbStr[2]);
-                    } catch (Exception e) {
-                        String msg = "Не верный формат! Ввести информацию в формате: Статистика: ДД.ММ.ГГ количество. Например:";
-                        String msg2 = "Статистика: " + getStringOfDate(new Date()) + " 5";
-                        homeGroupBotFacade.send(chatId, msg, keyboardMarkup);
-                        homeGroupBotFacade.send(chatId, msg2, keyboardMarkup);
-                        return;
-                    }
-                    Integer count;
-                    try {
-                        count = new Integer(str[2]);
-                    } catch (Exception e) {
-                        String msg = "Не верный формат! Ввести информацию в формате: Статистика: дд.мм.гг КОЛИЧЕСТВО. Например:";
-                        String msg2 = "Статистика: " + getStringOfDate(new Date()) + " 5";
-                        homeGroupBotFacade.send(chatId, msg, keyboardMarkup);
-                        homeGroupBotFacade.send(chatId, msg2, keyboardMarkup);
-                        return;
-                    }
-
-                    StatInfo statInfo = homeGroupBotFacade.addStatInfo(chatId, user, date, count);
-
-                    homeGroupBotFacade.send(chatId, "Получено: " + count + " за " + getStringOfDate(statInfo.getEventDate()), keyboardMarkup);
-                    return;
-                }
-
-                if (EMPTY_STAT_INFO_FIELD.equals(text)) {
-                    homeGroupBotFacade.sendLostStatInfos(chatId, user, keyboardMarkup, true);
-                    return;
-                }
-
-                if (ENTERED_STAT_INFO_FIELD.equals(text)) {
-                    homeGroupBotFacade.sendEnteredStatInfos(chatId, user, keyboardMarkup);
-                    return;
-                }
-
-                if (ALERT_SETTINGS_FIELD.equals(text)) {
-                    sendNotificationSettings(chatId, user, null);
-                    return;
-                }
+            Chain currentChain = chain;
+            while (!currentChain.check(text, user.hasHomeGroup(), user.isAdmin()) && currentChain.hasNext()) {
+                currentChain = currentChain.getNext();
             }
-
-            if (HOME_GROUPS_LIST_FIELD.equals(text)) {
-                homeGroupBotFacade.sendHomeGroupsList(chatId, keyboardMarkup, adminId);
+            if (currentChain.check(text, user.hasHomeGroup(), user.isAdmin())) {
+                currentChain.doJob(homeGroupBotFacade, chatId, text, user, keyboardMarkup, adminId);
                 return;
-            }
-
-            if (user.isAdmin()) {
-                if (USER_FIELD.equals(text)) {
-                    homeGroupBotFacade.sendUsersList(keyboardMarkup, adminId);
-                    return;
-                }
-                if (NEW_USERS_LIST_FIELD.equals(text)) {
-                    homeGroupBotFacade.sendNewUsersList(keyboardMarkup, adminId);
-                    return;
-                }
-                if (text.startsWith(INFO_ABOUT_FIELD)) {
-                    String[] inputStrings = text.split(INFO_ABOUT_FIELD);
-                    homeGroupBotFacade.sendInfoAbout(chatId, new Long(inputStrings[1]), keyboardMarkup);
-                    return;
-                }
-                if (INFO_ABOUT_FIELD2.equals(text)) {
-                    homeGroupBotFacade.send(chatId, "Введите команду в формате: " + INFO_ABOUT_FIELD
-                            + "<id пользователя> (id пользователей можно посмотреть в списке пользователей - нопка \"Пользователи\"). Например:" , keyboardMarkup);
-                    homeGroupBotFacade.send(chatId, INFO_ABOUT_FIELD + user.getId() , keyboardMarkup);
-                    return;
-                }
-                if (EMPTY_USERS_STAT_INFO_FIELD.equals(text)) {
-                    homeGroupBotFacade.sendAllLostStatInfo(chatId, keyboardMarkup);
-                    return;
-                }
-                if (DOWNLOAD_STAT_INFOS.equals(text)) {
-                    homeGroupBotFacade.downloadStatInfos(chatId, keyboardMarkup);
-                    return;
-                }
             }
 
             homeGroupBotFacade.send(chatId, "Привет, это бот для ввод инфорации о домашних группах.", keyboardMarkup);
@@ -246,7 +196,7 @@ public class HomeGroupBot extends TelegramLongPollingBot {
         Integer month = new Integer(monthString) - 1;
         int year = yearString.length() == 4 ? new Integer(yearString) : new Integer(yearString) + 2000;
 
-        Calendar calendar = new GregorianCalendar(year, month , day);
+        Calendar calendar = new GregorianCalendar(year, month, day);
         date = calendar.getTime();
         return date;
     }
