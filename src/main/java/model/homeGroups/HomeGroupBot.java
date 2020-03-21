@@ -57,8 +57,8 @@ public class HomeGroupBot extends TelegramLongPollingBot {
     Chain chain;
 
     public void fillChains() {
-        chain = new AlertSettingsChain()
-                .add(new DownloadStatInfosChain())
+        chain = new AlertSettingsChain();
+        chain.add(new DownloadStatInfosChain())
                 .add(new EmptyStatInfoDaysChain())
                 .add(new EmptyUsersStatInfoDaysChain())
                 .add(new EntedStatInfoChain())
