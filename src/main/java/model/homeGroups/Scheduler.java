@@ -17,7 +17,6 @@ public class Scheduler {
     private HomeGroupBotFacade homeGroupBotFacade;
 
     public void checkLostStatInfos() {
-
         List<User> allUsers = userService.findAll();
         for (User user : allUsers) {
             if (null == user.getTelegramUserId() || !user.isNotificationEnabled()) {

@@ -8,13 +8,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.regex.Pattern;
 
-import model.homeGroups.chain.AlertSettingsChain;
+import model.homeGroups.chain.ShowAlertSettingsChain;
 import model.homeGroups.chain.Chain;
 import model.homeGroups.chain.DownloadStatInfosChain;
 import model.homeGroups.chain.EmptyStatInfoDaysChain;
@@ -28,7 +24,6 @@ import model.homeGroups.chain.InputStatInfoChain;
 import model.homeGroups.chain.NewUsersChain;
 import model.homeGroups.chain.SendByChain;
 import model.homeGroups.chain.UsersChain;
-import model.homeGroups.db.StatInfo;
 import model.homeGroups.db.User;
 import model.homeGroups.service.UserService;
 
@@ -54,10 +49,10 @@ public class HomeGroupBot extends TelegramLongPollingBot {
     private final static String EMPTY_USERS_STAT_INFO_FIELD = "Не заполнено у пользователей";
     private final static String DOWNLOAD_STAT_INFOS = "Скачать статистику в xsl";
 
-    Chain chain;
+    private Chain chain;
 
     public void fillChains() {
-        chain = new AlertSettingsChain();
+        chain = new ShowAlertSettingsChain();
         chain.add(new DownloadStatInfosChain())
                 .add(new EmptyStatInfoDaysChain())
                 .add(new EmptyUsersStatInfoDaysChain())
@@ -114,7 +109,7 @@ public class HomeGroupBot extends TelegramLongPollingBot {
                     // когда зашёл первый раз и ввёл старт:
                     String msg = "Привет, это бот для ввода инфорации о ячеках. Для дальнейшей работы введите пароль (пароль можно узнать у администратора).";
                     homeGroupBotFacade.send(chatId, msg);
-                } else if ("qwepswrd".equals(text)) {
+                } else if ("alskd5".equals(text)) {
                     // когда первый раз успешно ввёл пароль:
                     user = homeGroupBotFacade.addUser(update.getMessage().getChat());
                     homeGroupBotFacade.send(chatId, "Данные записаны: " + user.toString());
@@ -143,15 +138,14 @@ public class HomeGroupBot extends TelegramLongPollingBot {
             } else {
                 keyboardMarkup = new CustomKeyboardMarkup(TO_INPUT_STAT_INFO_FIELD, EMPTY_STAT_INFO_FIELD, ENTERED_STAT_INFO_FIELD, ALERT_SETTINGS_FIELD, HOME_GROUPS_LIST_FIELD);
             }
-
             Chain currentChain = chain;
-            while (!currentChain.check(text, user.hasHomeGroup(), user.isAdmin()) && currentChain.hasNext()) {
-                currentChain = currentChain.getNext();
-            }
-            if (currentChain.check(text, user.hasHomeGroup(), user.isAdmin())) {
-                currentChain.doJob(homeGroupBotFacade, chatId, text, user, keyboardMarkup, adminId);
-                return;
-            }
+//            while (!currentChain.check(text, user.hasHomeGroup(), user.isAdmin()) && currentChain.hasNext()) {
+//                currentChain = currentChain.getNext();
+//            }
+//            if (currentChain.check(text, user.hasHomeGroup(), user.isAdmin())) {
+//                currentChain.doJob(homeGroupBotFacade, chatId, text, user, keyboardMarkup, adminId);
+//                return;
+//            }
 
             homeGroupBotFacade.send(chatId, "Привет, это бот для ввод инфорации о домашних группах.", keyboardMarkup);
         } else if (update.hasCallbackQuery()) {
@@ -188,23 +182,6 @@ public class HomeGroupBot extends TelegramLongPollingBot {
         inlineKeyboardButton.setCallbackData("notice_" + (switchOn ? "off" : "on"));
 
         homeGroupBotFacade.send(chatId, msgId, switchOn ? "уведомления включены" : "уведомления отключены", markupInline);
-    }
-
-    private Date getDate(String dayString, String monthString, String yearString) {
-        Date date;
-        Integer day = new Integer(dayString);
-        Integer month = new Integer(monthString) - 1;
-        int year = yearString.length() == 4 ? new Integer(yearString) : new Integer(yearString) + 2000;
-
-        Calendar calendar = new GregorianCalendar(year, month, day);
-        date = calendar.getTime();
-        return date;
-    }
-
-    private String getStringOfDate(Date date) {
-        Calendar calendar = new GregorianCalendar();
-        calendar.setTime(date);
-        return calendar.get(Calendar.DAY_OF_MONTH) + "." + (calendar.get(Calendar.MONTH) + 1) + "." + calendar.get(Calendar.YEAR);
     }
 
     @Override

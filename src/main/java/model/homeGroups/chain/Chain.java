@@ -1,21 +1,16 @@
 package model.homeGroups.chain;
 
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import model.homeGroups.facade.BotFacade;
+import model.homeGroups.facade.DBFacade;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Message;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.regex.Pattern;
-
-import model.homeGroups.HomeGroupBotFacade;
-import model.homeGroups.db.User;
+import java.util.Map;
 
 public abstract class Chain {
-    private Chain next = null;
+    public static final String USER_FIELD = "user";
 
-    public boolean check(String value, boolean hasHomeGroup, boolean isAdmin) {
-        return getPattern().matcher(value).matches();
-    }
+    private Chain next = null;
 
     public Chain getNext() {
         return next;
@@ -34,24 +29,33 @@ public abstract class Chain {
         return getNext();
     }
 
-    public abstract Pattern getPattern();
+    public abstract boolean check(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr);
 
-    public abstract void doJob(final HomeGroupBotFacade homeGroupBotFacade, final Long chatId, final String text, final User user, final ReplyKeyboardMarkup keyboardMarkup, final Long adminId);
+    public abstract void doJob(final DBFacade dbFacade, BotFacade botFacade, final Message message, CallbackQuery callbackQuery, Map<String, Object> atr);
 
-    protected Date getDate(String dayString, String monthString, String yearString) {
-        Date date;
-        Integer day = new Integer(dayString);
-        Integer month = new Integer(monthString) - 1;
-        int year = yearString.length() == 4 ? new Integer(yearString) : new Integer(yearString) + 2000;
+    public abstract String getCommand();
 
-        Calendar calendar = new GregorianCalendar(year, month, day);
-        date = calendar.getTime();
-        return date;
+    public String getExtCommand(BotFacade botFacade) {
+        return getCommand() + "@" + botFacade.getBotShortName();
     }
 
-    protected String getStringOfDate(Date date) {
-        Calendar calendar = new GregorianCalendar();
-        calendar.setTime(date);
-        return calendar.get(Calendar.DAY_OF_MONTH) + "." + (calendar.get(Calendar.MONTH) + 1) + "." + calendar.get(Calendar.YEAR);
+//    public abstract Pattern getPattern();
+
+    public String getArg(Message message, BotFacade botFacade) {
+        String text = message.getText();
+        if (text.startsWith(getExtCommand(botFacade) + " ")) {
+            return text.split(getExtCommand(botFacade) + " ")[1];
+        }
+        return text.split(getCommand() + " ")[1];
+    }
+
+    public boolean canGetArg(Message message, BotFacade botFacade) {
+        String text = message.getText();
+        if (text.startsWith(getExtCommand(botFacade))) {
+            String[] split = text.split(getExtCommand(botFacade) + " ");
+            return split.length >= 2;
+        }
+        String[] split = text.split(getCommand() + " ");
+        return split.length >= 2;
     }
 }
