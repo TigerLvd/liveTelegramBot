@@ -9,46 +9,47 @@ import utils.Utils;
 
 import java.util.Map;
 
-public class isUserChain extends Chain {
-    static private Chain chain;
+public class AuthorizedUserChain extends Chain {
+    private final Chain chain;
+    private Long rootId;
 
-    static {
+    public AuthorizedUserChain(Long rootId) {
+        this.rootId = rootId;
         chain = new CallBackChain();
-        chain.add(new AdminCommandChain())
+        chain.add(new AdminChain())
                 .add(new UserCommandChain());
-    }
-
-    public String getCommand() {
-        return null;
     }
 
     @Override
     public boolean check(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
-        Long chatId = null;
-        if (Utils.isField(callbackQuery) && Utils.isField(callbackQuery.getMessage())) {
-            chatId = callbackQuery.getMessage().getChatId();
-        } else if (Utils.isField(message)) {
-            chatId = message.getChatId();
-        }
+        Long chatId = getChatId(message, callbackQuery);
         if (Utils.isEmpty(chatId)) {
             return false;
         }
         User user = dbFacade.getUserService().findByTelegramId(chatId);
         if (Utils.isField(user)) {
             atr.put(USER_FIELD, user);
+            atr.put(IS_ADMIN_FIELD, Boolean.TRUE.equals(user.isAdmin()));
+            atr.put(IS_ROOT_FIELD, user.getId().equals(rootId));
+            if (user.hasHomeGroup()) {
+                atr.put(HOME_GROUP_FIELD, user.getHomeGroup());
+            }
             return true;
         }
         return false;
     }
 
+    private Long getChatId(Message message, CallbackQuery callbackQuery) {
+        if (Utils.isField(callbackQuery) && Utils.isField(callbackQuery.getMessage())) {
+            return callbackQuery.getMessage().getChatId();
+        } else if (Utils.isField(message)) {
+            return message.getChatId();
+        }
+        return null;
+    }
+
     @Override
     public void doJob(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
-        Chain currentChain = chain;
-        while (null != currentChain && !currentChain.check(dbFacade, botFacade, message, callbackQuery, atr)) {
-            currentChain = currentChain.getNext();
-        }
-        if (null != currentChain && currentChain.check(dbFacade, botFacade, message, callbackQuery, atr)) {
-            currentChain.doJob(dbFacade, botFacade, message, callbackQuery, atr);
-        }
+        goByChain(chain, dbFacade, botFacade, message, callbackQuery, atr);
     }
 }

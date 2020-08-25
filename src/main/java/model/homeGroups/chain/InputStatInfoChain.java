@@ -1,55 +1,56 @@
 package model.homeGroups.chain;
 
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-
-import java.util.Date;
-import java.util.regex.Pattern;
-
-import model.homeGroups.HomeGroupBotFacade;
 import model.homeGroups.db.StatInfo;
 import model.homeGroups.db.User;
+import model.homeGroups.facade.BotFacade;
+import model.homeGroups.facade.DBFacade;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import utils.Utils;
+
+import java.util.Date;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 public class InputStatInfoChain extends Chain {
-    private final Pattern pattern = Pattern.compile("\\s*Статистика:\\s*(\\d|\\d{2})\\.(\\d|\\d{2})\\.(\\d{4}|\\d{2})\\s*\\d\\d*\\s*", Pattern.CASE_INSENSITIVE);
+    private final Pattern pattern = Pattern.compile("\\s*(Статистика:|Статистика)\\s\\s*(\\d|\\d{2})\\.(\\d|\\d{2})\\.(\\d{4}|\\d{2})\\s\\s*\\d\\d*\\s*", Pattern.CASE_INSENSITIVE);
 
     @Override
-    public Pattern getPattern() {
-        return pattern;
+    public boolean check(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
+        return pattern.matcher(message.getText()).matches();
     }
 
     @Override
-    public void doJob(final HomeGroupBotFacade homeGroupBotFacade, final Long chatId, final String text, final User user, final ReplyKeyboardMarkup keyboardMarkup, Long adminId) {
+    public void doJob(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
         String[] str;
         Date date;
+        User user = (User) atr.get(USER_FIELD);
         try {
-            str = text.split(" ");
+            str = message.getText().trim().split("\\s\\s*");
             String[] sbStr = str[1].split("\\.");
 
-            date = getDate(sbStr[0], sbStr[1], sbStr[2]);
+            date = Utils.getDate(sbStr[0], sbStr[1], sbStr[2]);
         } catch (Exception e) {
-            String msg = "Не верный формат! Ввести информацию в формате: Статистика: ДД.ММ.ГГ количество. Например:";
-            String msg2 = "Статистика: " + getStringOfDate(new Date()) + " 5";
-            homeGroupBotFacade.send(chatId, msg, keyboardMarkup);
-            homeGroupBotFacade.send(chatId, msg2, keyboardMarkup);
+            sendExample(botFacade, message, user);
             return;
         }
-        Integer count;
+        int count;
         try {
-            count = new Integer(str[2]);
+            count = Integer.parseInt(str[2]);
         } catch (Exception e) {
-            String msg = "Не верный формат! Ввести информацию в формате: Статистика: дд.мм.гг КОЛИЧЕСТВО. Например:";
-            String msg2 = "Статистика: " + getStringOfDate(new Date()) + " 5";
-            homeGroupBotFacade.send(chatId, msg, keyboardMarkup);
-            homeGroupBotFacade.send(chatId, msg2, keyboardMarkup);
+            sendExample(botFacade, message, user);
             return;
         }
 
-        StatInfo statInfo = homeGroupBotFacade.addStatInfo(chatId, user, date, count);
+        StatInfo statInfo = dbFacade.getStatInfoService().addNewOrUpdate(message.getChatId(), user, date, count);
 
-        homeGroupBotFacade.send(chatId, "Получено: " + count + " за " + getStringOfDate(statInfo.getEventDate()), keyboardMarkup);
+        botFacade.sendMsg(message.getChatId(), "Получено: " + statInfo.getCount() + " за " + Utils.getStringOfDate(statInfo.getEventDate()), buildKeyboard(user));
     }
 
-    public boolean check(String value, boolean hasHomeGroup, boolean isAdmin) {
-        return hasHomeGroup && getPattern().matcher(value).matches();
+    private void sendExample(BotFacade botFacade, Message message, User user) {
+        String msg = "Не верный формат! Ввести информацию в формате: Статистика: ДД.ММ.ГГ количество. Например:";
+        String msg2 = "Статистика: " + Utils.getStringOfDate(new Date()) + " 5";
+        botFacade.sendMsg(message.getChatId(), msg, buildKeyboard(user));
+        botFacade.sendMsg(message.getChatId(), msg2, buildKeyboard(user));
     }
 }

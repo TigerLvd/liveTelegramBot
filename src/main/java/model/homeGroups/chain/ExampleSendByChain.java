@@ -5,29 +5,21 @@ import model.homeGroups.facade.BotFacade;
 import model.homeGroups.facade.DBFacade;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import utils.Utils;
 
 import java.util.Map;
+import java.util.regex.Pattern;
 
-public class CallBackChain extends Chain {
-    static private Chain chain;
-
-    static {
-        chain = new ChangeAlertSettingsChain();
-    }
+public class ExampleSendByChain extends Chain {
+    private final Pattern pattern = Pattern.compile("\\s*Ввод\\s\\s*за\\s*", Pattern.CASE_INSENSITIVE);
 
     @Override
     public boolean check(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
-        if (Utils.isField(callbackQuery)) {
-            Long chatId = callbackQuery.getMessage().getChatId();
-            User user = dbFacade.getUserService().findByTelegramId(chatId);
-            atr.put(USER_FIELD, user);
-        }
-        return Utils.isField(callbackQuery);
+        return pattern.matcher(message.getText()).matches() && isFieldAndTrue(atr.get(IS_ROOT_FIELD));
     }
 
     @Override
     public void doJob(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
-        goByChain(chain, dbFacade, botFacade, message, callbackQuery, atr);
+        String msg = "Введите информацию в формате: Ввод за <№ пользователя> <дд.мм.гг> <количество>";
+        botFacade.sendMsg(message.getChatId(), msg, buildKeyboard((User) atr.get(USER_FIELD)));
     }
 }

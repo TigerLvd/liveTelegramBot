@@ -8,6 +8,7 @@ import java.util.List;
 
 import model.homeGroups.dao.UserDaoService;
 import model.homeGroups.db.User;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 
 public class UserServiceImpl implements UserService {
     UserDaoService dao;
@@ -64,5 +65,24 @@ public class UserServiceImpl implements UserService {
         } else {
             return getDao().findAll();
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<User> findNew() {
+        return getDao().findNew();
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public User addUser(Chat chat) {
+        User user;
+        user = new User();
+        user.setFirstName(chat.getFirstName());
+        user.setLastName(chat.getLastName());
+        user.setNickName(chat.getUserName());
+        user.setTelegramUserId(chat.getId());
+        saveOrUpdate(user);
+        return user;
     }
 }

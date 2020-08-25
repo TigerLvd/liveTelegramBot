@@ -8,24 +8,15 @@ import utils.Utils;
 
 import java.util.Map;
 
-public class UserCommandChain extends Chain {
-    static private Chain chain;
-
-    static {
-        chain = new InputStatInfoChain();
-        chain.add(new ExampleInputStatInfoChain())
-                .add(new EmptyStatInfoChain())
-                .add(new EnteredStatInfoChain())
-                .add(new ShowAlertSettingsChain());
-    }
-
+public class WaitingAddingChain extends Chain {
     @Override
     public boolean check(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
-        return isCommandTextMessage(message) ;
+        return Utils.isField(atr.get(USER_FIELD)) && Utils.isEmpty(atr.get(HOME_GROUP_FIELD));
     }
 
     @Override
     public void doJob(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
-        goByChain(chain, dbFacade, botFacade, message, callbackQuery, atr);
+        Long chatId = message.getChatId();
+        botFacade.sendMsg(chatId, "Заявка на добавление была внесена, ожидайте принятия.");
     }
 }

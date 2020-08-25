@@ -1,7 +1,9 @@
 package model.homeGroups.service;
 
+import model.homeGroups.db.User;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -70,5 +72,24 @@ public class StatInfoServiceImpl implements StatInfoService {
     @Transactional(readOnly = true)
     public StatInfo findByDateAndHomeGroupId(Date date, Long id) {
         return getDao().findByDateAndHomeGroupId(date, id);
+    }
+
+    @Override
+    @Transactional
+    public StatInfo addNewOrUpdate(Long chatId, User user, Date eventDate, Integer count) {
+        StatInfo statInfo = findByDateAndHomeGroupId(eventDate, user.getHomeGroup().getId());
+        if (statInfo == null) {
+            statInfo = new StatInfo();
+        }
+        statInfo.setCount(count);
+        statInfo.setEventDate(eventDate);
+        statInfo.setSaveDate(new Timestamp(new Date().getTime()));
+        statInfo.setSaverId(chatId.intValue());
+        statInfo.setComment(user.getTelegramUserId().equals(chatId) ? user.getComment() : "root");
+        statInfo.setHomeGroup(user.getHomeGroup());
+
+        saveOrUpdate(statInfo);
+
+        return statInfo;
     }
 }

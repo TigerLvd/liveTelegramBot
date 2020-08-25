@@ -8,20 +8,17 @@ import utils.Utils;
 
 import java.util.Map;
 
-public class UserCommandChain extends Chain {
-    static private Chain chain;
+public class AuthorityChain extends Chain {
+    private final Chain chain;
 
-    static {
-        chain = new InputStatInfoChain();
-        chain.add(new ExampleInputStatInfoChain())
-                .add(new EmptyStatInfoChain())
-                .add(new EnteredStatInfoChain())
-                .add(new ShowAlertSettingsChain());
+    public AuthorityChain(Long adminId) {
+        chain = new AddUserChain(adminId);
+        chain.add(new WaitingAddingChain());
     }
 
     @Override
     public boolean check(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
-        return isCommandTextMessage(message) ;
+        return Utils.isEmpty(atr.get(HOME_GROUP_FIELD));
     }
 
     @Override

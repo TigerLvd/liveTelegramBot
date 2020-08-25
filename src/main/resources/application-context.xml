@@ -80,19 +80,21 @@
         <property name="persistentClass" value="model.liveInfo.db.Field"/>
     </bean>
 
-    <bean id="Scheduler" class="model.homeGroups.Scheduler">
-        <property name="userService" ref="UserService"/>
-        <property name="homeGroupBotFacade" ref="HomeGroupBotFacade"/>
+    <bean id="schedulerFacade" class="model.homeGroups.facade.SchedulerFacade">
+        <property name="dbFacade" ref="dbFacade"/>
+        <property name="botFacade" ref="botFacade"/>
     </bean>
 
-    <bean id="HomeGroupBotFacade" class="model.homeGroups.HomeGroupBotFacadeImpl">
+    <bean id="dbFacade" class="model.homeGroups.facade.DBFacade">
         <property name="userService" ref="UserService"/>
         <property name="homeGroupService" ref="HomeGroupService"/>
         <property name="statInfoService" ref="StatInfoService"/>
     </bean>
 
+    <bean id="botFacade" class="model.homeGroups.facade.BotFacade"/>
+
     <task:scheduled-tasks scheduler="printingScheduler">
-        <task:scheduled ref="Scheduler" method="checkLostStatInfos" cron="0 0 11 * * 3"/>
+        <task:scheduled ref="schedulerFacade" method="checkLostStatInfos" cron="0 0 11 * * 3"/>
     </task:scheduled-tasks>
 
     <task:scheduler id="printingScheduler" />

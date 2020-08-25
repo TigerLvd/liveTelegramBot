@@ -1,5 +1,8 @@
 package controllers;
 
+import model.homeGroups.facade.BotFacade;
+import model.homeGroups.facade.DBFacade;
+import model.liveInfo.services.FieldService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.telegram.telegrambots.ApiContextInitializer;
@@ -13,10 +16,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import model.homeGroups.HomeGroupBot;
-import model.homeGroups.HomeGroupBotFacade;
-import model.homeGroups.service.UserService;
 import model.liveInfo.LiveInfoBot;
-import model.liveInfo.services.FieldService;
 import model.liveInfoAdmin.LiveInfoAdminBot;
 
 public class Main {
@@ -26,6 +26,7 @@ public class Main {
     private static String BOT_TOKEN2;
     private static String BOT_NAME3;
     private static String BOT_TOKEN3;
+    private static String AUTH_PSWRD;
 
     private static String PROXY_HOST;
     private static Integer PROXY_PORT;
@@ -48,8 +49,8 @@ public class Main {
 
             ApplicationContext applicationContext = new ClassPathXmlApplicationContext("application-context.xml");
 
-            UserService userService = (UserService) applicationContext.getBean("UserService");
-            HomeGroupBotFacade homeGroupBotFacade = (HomeGroupBotFacade) applicationContext.getBean("HomeGroupBotFacade");
+            BotFacade botFacade = (BotFacade) applicationContext.getBean("botFacade");
+            DBFacade dbFacade = (DBFacade) applicationContext.getBean("dbFacade");
             FieldService fieldService = (FieldService) applicationContext.getBean("FieldService");
 
             if (Boolean.TRUE.equals(USE_PROXY)) {
@@ -58,7 +59,7 @@ public class Main {
                 botOptions.setProxyPort(PROXY_PORT);
                 botOptions.setProxyType(DefaultBotOptions.ProxyType.SOCKS5);
 
-                bot = new HomeGroupBot(BOT_TOKEN, BOT_NAME, ADMIN_ID, botOptions, userService, homeGroupBotFacade);
+                bot = new HomeGroupBot(BOT_TOKEN, BOT_NAME, ADMIN_ID, botOptions, botFacade, dbFacade);
                 bot2 = new LiveInfoBot(BOT_TOKEN2, BOT_NAME2, botOptions, fieldService);
                 bot3 = new LiveInfoAdminBot(BOT_TOKEN3, BOT_NAME3, botOptions, fieldService, ADMIN_ID);
             } else {
@@ -74,7 +75,7 @@ public class Main {
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
-        System.out.println("qe");
+        System.out.println("STARTED!!!");
     }
 
     private static void init() {
@@ -87,15 +88,16 @@ public class Main {
 
             BOT_NAME = property.getProperty("bot_name");
             BOT_TOKEN = property.getProperty("bot_token");
+            AUTH_PSWRD = property.getProperty("auth_pswrd");
             BOT_NAME2 = property.getProperty("bot_name2");
             BOT_TOKEN2 = property.getProperty("bot_token2");
             BOT_NAME3 = property.getProperty("bot_name3");
             BOT_TOKEN3 = property.getProperty("bot_token3");
 
             PROXY_HOST = property.getProperty("proxy_host");
-            PROXY_PORT = new Integer(property.getProperty("proxy_port"));
+            PROXY_PORT = Integer.valueOf(property.getProperty("proxy_port"));
 
-            ADMIN_ID = new Long(property.getProperty("admin_id"));
+            ADMIN_ID = Long.valueOf(property.getProperty("admin_id"));
 
             System.out.println("BOT_NAME: " + BOT_NAME
                     + ", BOT_NAME2: " + BOT_NAME2

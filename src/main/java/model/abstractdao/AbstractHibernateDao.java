@@ -7,6 +7,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
 import org.springframework.util.CollectionUtils;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -17,6 +18,10 @@ public abstract class AbstractHibernateDao<T> implements Dao<T> {
     private Class<T> persistentClass;
 
     public AbstractHibernateDao() {
+    }
+
+    protected CriteriaBuilder getCriteriaBuilder() {
+        return getSession().getCriteriaBuilder();
     }
 
     public SessionFactory getSessionFactory() {

@@ -16,10 +16,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class ChangeAlertSettingsChain extends Chain {
-    @Override
-    public String getCommand() {
-        return null;
-    }
 
     @Override
     public boolean check(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {

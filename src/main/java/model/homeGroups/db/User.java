@@ -1,5 +1,7 @@
 package model.homeGroups.db;
 
+import utils.Utils;
+
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -145,7 +147,7 @@ public class User {
     }
 
     public boolean hasHomeGroup() {
-        return getHomeGroup() != null;
+        return Utils.isField(getHomeGroup());
     }
 
     @Override

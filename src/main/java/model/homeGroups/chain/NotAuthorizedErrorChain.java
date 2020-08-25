@@ -4,28 +4,18 @@ import model.homeGroups.facade.BotFacade;
 import model.homeGroups.facade.DBFacade;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import utils.Utils;
 
 import java.util.Map;
 
-public class UserCommandChain extends Chain {
-    static private Chain chain;
-
-    static {
-        chain = new InputStatInfoChain();
-        chain.add(new ExampleInputStatInfoChain())
-                .add(new EmptyStatInfoChain())
-                .add(new EnteredStatInfoChain())
-                .add(new ShowAlertSettingsChain());
-    }
-
+public class NotAuthorizedErrorChain extends Chain {
     @Override
     public boolean check(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
-        return isCommandTextMessage(message) ;
+        return true;
     }
 
     @Override
     public void doJob(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
-        goByChain(chain, dbFacade, botFacade, message, callbackQuery, atr);
+        Long chatId = message.getChatId();
+        botFacade.sendMsg(chatId, "Для дальнейшей работы введите пароль (пароль можно узнать у администратора).");
     }
 }

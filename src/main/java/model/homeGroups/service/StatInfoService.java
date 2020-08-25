@@ -1,6 +1,7 @@
 package model.homeGroups.service;
 
 import model.homeGroups.db.StatInfo;
+import model.homeGroups.db.User;
 
 import java.util.Collection;
 import java.util.Date;
@@ -22,4 +23,6 @@ public interface StatInfoService {
     List<StatInfo> findAllByHomeGroupId(Long id);
 
     StatInfo findByDateAndHomeGroupId(Date date, Long id);
+
+    StatInfo addNewOrUpdate(Long chatId, User user, Date date, Integer count);
 }
