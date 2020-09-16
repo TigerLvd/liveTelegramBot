@@ -23,7 +23,7 @@ public class ShowNewUsersChain extends Chain {
     @Override
     public void doJob(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
         List<User> users = dbFacade.getUserService().findNew();
-        botFacade.sendMessageByBlocks(message.getChatId(), buildMessage(users), buildKeyboard((User) atr.get(USER_FIELD)));
+        botFacade.sendMessageByBlocks(message.getChatId(), buildMessage(users), buildKeyboardForUser((User) atr.get(USER_FIELD)));
     }
 
     private List<String> buildMessage(List<User> users) {

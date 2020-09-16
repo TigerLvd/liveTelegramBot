@@ -21,9 +21,9 @@ public class InfoAboutCallbackChain extends Chain {
 
     @Override
     public void doJob(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
-        String[] inputStrings = message.getText().split("info_about_");
+        String[] inputStrings = callbackQuery.getData().split("info_about_");
         User userInfo = dbFacade.getUserService().findById(Long.valueOf(inputStrings[1].trim()));
-        botFacade.sendMessageByBlocks(message.getChatId(), buildMessage(dbFacade, userInfo), buildKeyboard(userInfo));
+        botFacade.sendMessageByBlocks(callbackQuery.getMessage().getChatId(), buildMessage(dbFacade, userInfo), buildKeyboardForUser((User) atr.get(USER_FIELD)));
     }
 
     private List<String> buildMessage(DBFacade dbFacade, User userInfo) {

@@ -23,8 +23,8 @@ public class ExampleInfoAboutChain extends Chain {
     public void doJob(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
         User user = (User) atr.get(USER_FIELD);
         botFacade.sendMsg(message.getChatId(), "Введите команду в формате: Инфа по "
-                + "<id пользователя> (id пользователей можно посмотреть в списке пользователей - кнопка \"Пользователи\"). Например:", buildKeyboard(user));
-        botFacade.sendMsg(message.getChatId(), "Инфа по " + user.getId(), buildKeyboard(user));
+                + "<id пользователя> (id пользователей можно посмотреть в списке пользователей - кнопка \"Пользователи\"). Например:", buildKeyboardForUser(user));
+        botFacade.sendMsg(message.getChatId(), "Инфа по " + user.getId(), buildKeyboardForUser(user));
         List<User> users = dbFacade.getUserService().findAll();
         if (Utils.isField(users)) {
             botFacade.sendMsg(message.getChatId(), "Или выбирете пользователя:", buildInlineChooseUserKeyboard("info_about_", users));

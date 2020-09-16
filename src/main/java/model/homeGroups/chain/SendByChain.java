@@ -27,7 +27,7 @@ public class SendByChain extends Chain {
         Long id = Long.parseLong(strings[2].trim());
         User user = dbFacade.getUserService().findById(id);
         if (Utils.isEmpty(user)) {
-            botFacade.sendMsg(message.getChatId(), "По указанному id пользователь не найден", buildKeyboard((User) atr.get(USER_FIELD)));
+            botFacade.sendMsg(message.getChatId(), "По указанному id пользователь не найден", buildKeyboardForUser((User) atr.get(USER_FIELD)));
             return;
         }
 
@@ -35,7 +35,7 @@ public class SendByChain extends Chain {
         Date date = Utils.getDate(strings[3], strings[4], strings[5]);
 
         StatInfo statInfo = dbFacade.getStatInfoService().addNewOrUpdate(message.getChatId(), user, date, count);
-        botFacade.sendMsg(message.getChatId(), buildMessage(user, statInfo.getCount(), statInfo.getEventDate()), buildKeyboard((User) atr.get(USER_FIELD)));
+        botFacade.sendMsg(message.getChatId(), buildMessage(user, statInfo.getCount(), statInfo.getEventDate()), buildKeyboardForUser((User) atr.get(USER_FIELD)));
     }
 
     private String buildMessage(User user, Integer count, Date date) {

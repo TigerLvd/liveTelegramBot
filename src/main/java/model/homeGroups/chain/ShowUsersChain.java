@@ -24,7 +24,7 @@ public class ShowUsersChain extends Chain {
     public void doJob(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
         User user = (User) atr.get(USER_FIELD);
         List<User> allUsers = dbFacade.getUserService().findAll();
-        botFacade.sendMessageByBlocks(user.getId(), buildBlocks(allUsers), buildKeyboard(user));
+        botFacade.sendMessageByBlocks(message.getChatId(), buildBlocks(allUsers), buildKeyboardForUser(user));
     }
 
     private List<String> buildBlocks(List<User> allUsers) {

@@ -48,6 +48,7 @@ public class HomeGroupBot extends TelegramLongPollingBot {
         this.adminId = adminId;
 
         this.botFacade = botFacade;
+        this.botFacade.init(this, botName);
         this.dbFacade = dbFacade;
 
         fillChains();

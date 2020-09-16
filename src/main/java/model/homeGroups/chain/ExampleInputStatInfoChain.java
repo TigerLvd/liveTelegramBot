@@ -28,8 +28,8 @@ public class ExampleInputStatInfoChain extends Chain {
 
         User user = (User) atr.get(USER_FIELD);
 
-        botFacade.sendMsg(message.getChatId(), msg, buildKeyboard(user));
-        botFacade.sendMsg(message.getChatId(), msg2, buildKeyboard(user));
-        botFacade.sendMsg(message.getChatId(), msg3, buildKeyboard(user));
+        botFacade.sendMsg(message.getChatId(), msg, buildKeyboardForUser(user));
+        botFacade.sendMsg(message.getChatId(), msg2, buildKeyboardForUser(user));
+        botFacade.sendMsg(message.getChatId(), msg3, buildKeyboardForUser(user));
     }
 }

@@ -18,6 +18,7 @@ import java.util.*;
 public class BotFacade {
     private final String rootPath = "/";
     private final int MAX_COUNT_ITEMS_IN_MESSAGE = 10;
+    private final boolean ENABLE_HTML = false;
 
     private TelegramLongPollingBot bot;
     private String botShortName;
@@ -37,7 +38,7 @@ public class BotFacade {
 
     public void sendMsg(SendMessage message) {
         try {
-            message.enableHtml(true);
+            message.enableHtml(ENABLE_HTML);
             getBot().execute(message); // Call method to send the message
         } catch (TelegramApiException e) {
             e.printStackTrace();
@@ -47,7 +48,7 @@ public class BotFacade {
     public void sendMsg(final Long chatId, final String msg) {
         SendMessage message = new SendMessage()
                 .setChatId(chatId)
-                .enableHtml(true)
+                .enableHtml(ENABLE_HTML)
                 .setText(msg);
         try {
             getBot().execute(message);
@@ -60,7 +61,7 @@ public class BotFacade {
         SendMessage message = new SendMessage()
                 .setChatId(chatId)
                 .setText(msg)
-                .enableHtml(true)
+                .enableHtml(ENABLE_HTML)
                 .setReplyMarkup(replyKeyboard);
         try {
             getBot().execute(message);
@@ -87,7 +88,7 @@ public class BotFacade {
                 .setChatId(chatId)
                 .setMessageId(messageId)
                 .setText(msg)
-                .enableHtml(true)
+                .enableHtml(ENABLE_HTML)
                 .setReplyMarkup(markupInline);
         try {
             getBot().execute(message);
@@ -100,7 +101,7 @@ public class BotFacade {
         EditMessageText message = new EditMessageText()
                 .setChatId(chatId)
                 .setMessageId(messageId)
-                .enableHtml(true)
+                .enableHtml(ENABLE_HTML)
                 .setText(msg);
         try {
             getBot().execute(message);

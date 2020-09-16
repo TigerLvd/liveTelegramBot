@@ -23,7 +23,8 @@ public class InfoAboutChain extends Chain {
     public void doJob(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
         String[] inputStrings = message.getText().split("Инфа по ");
         User userInfo = dbFacade.getUserService().findById(Long.valueOf(inputStrings[1].trim()));
-        botFacade.sendMessageByBlocks(message.getChatId(), buildMessage(dbFacade, userInfo), buildKeyboard(userInfo));
+        User user = (User) atr.get(USER_FIELD);
+        botFacade.sendMessageByBlocks(message.getChatId(), buildMessage(dbFacade, userInfo), buildKeyboardForUser(user));
     }
 
     private List<String> buildMessage(DBFacade dbFacade, User userInfo) {

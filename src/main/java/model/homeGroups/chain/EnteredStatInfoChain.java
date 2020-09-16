@@ -25,7 +25,7 @@ public class EnteredStatInfoChain extends Chain {
     public void doJob(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
         User user = (User) atr.get(USER_FIELD);
         List<StatInfo> allStatInfos = dbFacade.getStatInfoService().findAllByHomeGroupId(user.getHomeGroup().getId());
-        botFacade.sendMessageByBlocks(message.getChatId(), buildBlocks(allStatInfos), buildKeyboard(user));
+        botFacade.sendMessageByBlocks(message.getChatId(), buildBlocks(allStatInfos), buildKeyboardForUser(user));
     }
 
     private List<String> buildBlocks(List<StatInfo> allStatInfos) {

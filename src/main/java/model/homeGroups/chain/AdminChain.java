@@ -19,7 +19,12 @@ public class AdminChain extends Chain {
                 .add(new ShowEmptyUsersStatInfoDaysChain())
                 .add(new DownloadStatInfosChain())
                 .add(new SendByChain())
-                .add(new ExampleSendByChain());
+                .add(new ExampleSendByChain())
+                .add(new InputStatInfoChain())
+                .add(new ExampleInputStatInfoChain())
+                .add(new EmptyStatInfoChain())
+                .add(new EnteredStatInfoChain())
+                .add(new ShowAlertSettingsChain());
     }
 
     @Override

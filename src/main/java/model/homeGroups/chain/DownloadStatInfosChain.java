@@ -27,7 +27,7 @@ public class DownloadStatInfosChain extends Chain {
 
     @Override
     public void doJob(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
-        downloadStatInfos(dbFacade, botFacade, message.getChatId(), buildKeyboard((User) atr.get(USER_FIELD)));
+        downloadStatInfos(dbFacade, botFacade, message.getChatId(), buildKeyboardForUser((User) atr.get(USER_FIELD)));
     }
 
     public void downloadStatInfos(DBFacade dbFacade, BotFacade botFacade, Long chatId, ReplyKeyboardMarkup keyboardMarkup) {

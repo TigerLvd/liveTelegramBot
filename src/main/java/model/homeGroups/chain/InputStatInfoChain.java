@@ -44,13 +44,13 @@ public class InputStatInfoChain extends Chain {
 
         StatInfo statInfo = dbFacade.getStatInfoService().addNewOrUpdate(message.getChatId(), user, date, count);
 
-        botFacade.sendMsg(message.getChatId(), "Получено: " + statInfo.getCount() + " за " + Utils.getStringOfDate(statInfo.getEventDate()), buildKeyboard(user));
+        botFacade.sendMsg(message.getChatId(), "Получено: " + statInfo.getCount() + " за " + Utils.getStringOfDate(statInfo.getEventDate()), buildKeyboardForUser(user));
     }
 
     private void sendExample(BotFacade botFacade, Message message, User user) {
         String msg = "Не верный формат! Ввести информацию в формате: Статистика: ДД.ММ.ГГ количество. Например:";
         String msg2 = "Статистика: " + Utils.getStringOfDate(new Date()) + " 5";
-        botFacade.sendMsg(message.getChatId(), msg, buildKeyboard(user));
-        botFacade.sendMsg(message.getChatId(), msg2, buildKeyboard(user));
+        botFacade.sendMsg(message.getChatId(), msg, buildKeyboardForUser(user));
+        botFacade.sendMsg(message.getChatId(), msg2, buildKeyboardForUser(user));
     }
 }

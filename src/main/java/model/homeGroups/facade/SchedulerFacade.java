@@ -2,8 +2,7 @@ package model.homeGroups.facade;
 
 import model.homeGroups.chain.Chain;
 import model.homeGroups.db.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.List;
@@ -23,7 +22,7 @@ public class SchedulerFacade {
                 continue;
             }
 
-            botFacade.sendLostStatInfos(dbFacade, user.getTelegramUserId(), user, Chain.buildKeyboard(user), false);
+            botFacade.sendLostStatInfos(dbFacade, user.getTelegramUserId(), user, Chain.buildKeyboardForUser(user), false);
         }
     }
 

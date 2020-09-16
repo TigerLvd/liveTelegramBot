@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class ShowEmptyUsersStatInfoDaysChain extends Chain {
-    private final Pattern pattern = Pattern.compile("\\sНе\\s*заполнено\\s\\s*у\\s*пользователей\\s", Pattern.CASE_INSENSITIVE);
+    private final Pattern pattern = Pattern.compile("\\s*Не\\s\\s*заполнено\\s\\s*у\\s\\s*пользователей\\s*", Pattern.CASE_INSENSITIVE);
 
     @Override
     public boolean check(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
@@ -24,7 +24,7 @@ public class ShowEmptyUsersStatInfoDaysChain extends Chain {
     @Override
     public void doJob(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
         List<User> users = dbFacade.getUserService().findAll();
-        botFacade.sendMessageByBlocks(message.getChatId(), buildMessage(dbFacade, botFacade, users), buildKeyboard((User) atr.get(USER_FIELD)));
+        botFacade.sendMessageByBlocks(message.getChatId(), buildMessage(dbFacade, botFacade, users), buildKeyboardForUser((User) atr.get(USER_FIELD)));
     }
 
     private List<String> buildMessage(DBFacade dbFacade, BotFacade botFacade, List<User> users) {

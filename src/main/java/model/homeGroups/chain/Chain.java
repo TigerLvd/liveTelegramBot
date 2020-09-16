@@ -64,7 +64,7 @@ public abstract class Chain {
         return null;
     }
 
-    public static ReplyKeyboardMarkup buildKeyboard(User user) {
+    public static ReplyKeyboardMarkup buildKeyboardForUser(User user) {
         Set<String> labels = new HashSet<>();
         if (user.hasHomeGroup()) {
             labels.add(TO_INPUT_STAT_INFO_COMMAND);
@@ -113,10 +113,10 @@ public abstract class Chain {
 
         int size = users.size();
         int i = 0;
-        while (i <= size) {
+        while (i < size) {
             List<InlineKeyboardButton> rowInline = new ArrayList<>();
             addRowInline(prefix, users.get(i++), rowInline);
-            if (i <= size) {
+            if (i < size) {
                 addRowInline(prefix, users.get(i++), rowInline);
             }
 

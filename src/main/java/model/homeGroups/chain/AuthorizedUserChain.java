@@ -30,7 +30,7 @@ public class AuthorizedUserChain extends Chain {
         if (Utils.isField(user)) {
             atr.put(USER_FIELD, user);
             atr.put(IS_ADMIN_FIELD, Boolean.TRUE.equals(user.isAdmin()));
-            atr.put(IS_ROOT_FIELD, user.getId().equals(rootId));
+            atr.put(IS_ROOT_FIELD, user.getTelegramUserId().equals(rootId));
             if (user.hasHomeGroup()) {
                 atr.put(HOME_GROUP_FIELD, user.getHomeGroup());
             }

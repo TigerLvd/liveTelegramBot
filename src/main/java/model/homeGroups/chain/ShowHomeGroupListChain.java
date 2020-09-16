@@ -25,7 +25,7 @@ public class ShowHomeGroupListChain extends Chain {
     @Override
     public void doJob(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
         List<HomeGroup> groups = dbFacade.getHomeGroupService().findAll(HomeGroup.LIEDER_FIELD);
-        botFacade.sendMessageByBlocks(message.getChatId(), buildBlocks(atr, groups), buildKeyboard((User) atr.get(USER_FIELD)));
+        botFacade.sendMessageByBlocks(message.getChatId(), buildBlocks(atr, groups), buildKeyboardForUser((User) atr.get(USER_FIELD)));
     }
 
     private List<String> buildBlocks(Map<String, Object> atr, List<HomeGroup> groups) {
