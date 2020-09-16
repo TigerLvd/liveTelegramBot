@@ -11,17 +11,17 @@ import utils.Utils;
 import java.util.*;
 import java.util.regex.Pattern;
 
-public class InfoAboutChain extends Chain {
-    private final Pattern pattern = Pattern.compile("\\s*Инфа\\s\\s*по\\s\\s*\\d*\\s*", Pattern.CASE_INSENSITIVE);
+public class InfoAboutCallbackChain extends Chain {
+    private final Pattern pattern = Pattern.compile("info_about_\\d*", Pattern.CASE_INSENSITIVE);
 
     @Override
     public boolean check(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
-        return pattern.matcher(message.getText()).matches();
+        return pattern.matcher(callbackQuery.getData()).matches();
     }
 
     @Override
     public void doJob(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
-        String[] inputStrings = message.getText().split("Инфа по ");
+        String[] inputStrings = message.getText().split("info_about_");
         User userInfo = dbFacade.getUserService().findById(Long.valueOf(inputStrings[1].trim()));
         botFacade.sendMessageByBlocks(message.getChatId(), buildMessage(dbFacade, userInfo), buildKeyboard(userInfo));
     }

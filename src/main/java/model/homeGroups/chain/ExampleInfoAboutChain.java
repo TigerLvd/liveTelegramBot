@@ -5,7 +5,9 @@ import model.homeGroups.facade.BotFacade;
 import model.homeGroups.facade.DBFacade;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import utils.Utils;
 
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -21,7 +23,11 @@ public class ExampleInfoAboutChain extends Chain {
     public void doJob(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
         User user = (User) atr.get(USER_FIELD);
         botFacade.sendMsg(message.getChatId(), "Введите команду в формате: Инфа по "
-                + "<id пользователя> (id пользователей можно посмотреть в списке пользователей - нопка \"Пользователи\"). Например:", buildKeyboard(user));
+                + "<id пользователя> (id пользователей можно посмотреть в списке пользователей - кнопка \"Пользователи\"). Например:", buildKeyboard(user));
         botFacade.sendMsg(message.getChatId(), "Инфа по " + user.getId(), buildKeyboard(user));
+        List<User> users = dbFacade.getUserService().findAll();
+        if (Utils.isField(users)) {
+            botFacade.sendMsg(message.getChatId(), "Или выбирете пользователя:", buildInlineChooseUserKeyboard("info_about_", users));
+        }
     }
 }

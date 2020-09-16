@@ -14,6 +14,7 @@ public class CallBackChain extends Chain {
 
     static {
         chain = new ChangeAlertSettingsChain();
+        chain.add(new InfoAboutCallbackChain());
     }
 
     @Override
