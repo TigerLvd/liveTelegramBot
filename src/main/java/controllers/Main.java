@@ -64,7 +64,7 @@ public class Main {
                 bot3 = new LiveInfoAdminBot(BOT_TOKEN3, BOT_NAME3, botOptions, fieldService, ADMIN_ID);
             } else {
                 // use VPN
-                bot = new HomeGroupBot(BOT_TOKEN, BOT_NAME, ADMIN_ID, userService, homeGroupBotFacade);
+                bot = new HomeGroupBot(BOT_TOKEN, BOT_NAME, ADMIN_ID, botFacade, dbFacade);
                 bot2 = new LiveInfoBot(BOT_TOKEN2, BOT_NAME2, fieldService);
                 bot3 = new LiveInfoAdminBot(BOT_TOKEN3, BOT_NAME3, fieldService, ADMIN_ID);
             }
