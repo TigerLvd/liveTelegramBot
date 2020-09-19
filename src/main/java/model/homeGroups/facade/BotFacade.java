@@ -1,5 +1,6 @@
 package model.homeGroups.facade;
 
+import model.homeGroups.db.HomeGroup;
 import model.homeGroups.db.StatInfo;
 import model.homeGroups.db.User;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -124,7 +125,7 @@ public class BotFacade {
     }
 
     public void sendLostStatInfos(DBFacade dbFacade, Long chatId, User user, ReplyKeyboardMarkup keyboardMarkup, Boolean sendEmpty) {
-        List<Date> lostWeeks = getLostWeeks(dbFacade, user);
+        List<Date> lostWeeks = getLostWeeks(dbFacade, user.getHomeGroup());
 
         if (lostWeeks.isEmpty()) {
             if (!sendEmpty) {
@@ -148,13 +149,13 @@ public class BotFacade {
     }
 
     /**
-     * @param user пользователь по которому ищется информация
+     * @param homeGroup ячейка по которой ищется информация
      * @return список понедельников у недель, где не было внесено информации о статистике, начиная с даты
      * включения ячейки в систему.
      */
-    public List<Date> getLostWeeks(DBFacade dbFacade, User user) {
-        Map<Date, StatInfo> statInfoByFirstDayOfWeek = getMapStatInfoByFirstDayOfWeek(dbFacade, user.getHomeGroup().getId());
-        Calendar start = getStartDate(user);
+    public List<Date> getLostWeeks(DBFacade dbFacade, HomeGroup homeGroup) {
+        Map<Date, StatInfo> statInfoByFirstDayOfWeek = getMapStatInfoByFirstDayOfWeek(dbFacade, homeGroup.getId());
+        Calendar start = getStartDate(homeGroup);
         List<Date> lostWeeks = new ArrayList<>();
         while (start.before(new GregorianCalendar())) {
             if (statInfoByFirstDayOfWeek.get(start.getTime()) == null) {
@@ -177,11 +178,11 @@ public class BotFacade {
         return statInfoByFirstDayOfWeek;
     }
 
-    public Calendar getStartDate(User user) {
+    public Calendar getStartDate(HomeGroup homeGroup) {
         Calendar start;
-        if (user.getHomeGroup().getStartDate() != null) {
+        if (homeGroup.getStartDate() != null) {
             start = new GregorianCalendar();
-            start.setTime(user.getHomeGroup().getStartDate());
+            start.setTime(homeGroup.getStartDate());
         } else {
             start = new GregorianCalendar();
         }

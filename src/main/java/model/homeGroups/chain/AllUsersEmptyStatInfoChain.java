@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public class ShowEmptyUsersStatInfoDaysChain extends Chain {
+public class AllUsersEmptyStatInfoChain extends Chain {
     private final Pattern pattern = Pattern.compile("\\s*Не\\s\\s*заполнено\\s\\s*у\\s\\s*пользователей\\s*", Pattern.CASE_INSENSITIVE);
 
     @Override
@@ -40,7 +40,7 @@ public class ShowEmptyUsersStatInfoDaysChain extends Chain {
 
         for (User user : users) {
             if (user.hasHomeGroup()) {
-                List<Date> lostWeeks = botFacade.getLostWeeks(dbFacade, user);
+                List<Date> lostWeeks = botFacade.getLostWeeks(dbFacade, user.getHomeGroup());
                 if (!lostWeeks.isEmpty()) {
                     StringBuilder stringBuilder = new StringBuilder();
                     stringBuilder.append("У пользователя ");

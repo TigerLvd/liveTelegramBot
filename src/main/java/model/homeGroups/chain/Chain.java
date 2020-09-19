@@ -27,7 +27,7 @@ public abstract class Chain {
     protected final static String HOME_GROUPS_LIST_COMMAND = "Список ячеек";
     protected final static String NEW_USERS_LIST_COMMAND = "Новые пользователи";
     protected final static String INFO_ABOUT_COMMAND = "Инфа по ";
-    protected final static String INFO_ABOUT_COMMAND2 = "Инфа по";
+    protected final static String EMPTY_HOME_GROUPS_STAT_INFO_COMMAND = "Не заполнено у ячеек";
     protected final static String EMPTY_USERS_STAT_INFO_COMMAND = "Не заполнено у пользователей";
     protected final static String DOWNLOAD_STAT_INFOS = "Скачать статистику в xsl";
 
@@ -78,6 +78,7 @@ public abstract class Chain {
             labels.add(NEW_USERS_LIST_COMMAND);
             labels.add(INFO_ABOUT_COMMAND);
             labels.add(EMPTY_USERS_STAT_INFO_COMMAND);
+            labels.add(EMPTY_HOME_GROUPS_STAT_INFO_COMMAND);
             labels.add(DOWNLOAD_STAT_INFOS);
             labels.add(INPUT_STAT_INFO_BY_COMMAND);
         }
