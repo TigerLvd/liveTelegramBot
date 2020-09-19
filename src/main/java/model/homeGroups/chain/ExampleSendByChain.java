@@ -19,7 +19,7 @@ public class ExampleSendByChain extends Chain {
 
     @Override
     public void doJob(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
-        String msg = "Введите информацию в формате: Ввод за <№ пользователя> <дд.мм.гг> <количество>";
+        String msg = "Введите информацию в формате: Ввод за <№ ячейки> <дд.мм.гг> <количество>";
         botFacade.sendMsg(message.getChatId(), msg, buildKeyboardForUser((User) atr.get(USER_FIELD)));
     }
 }

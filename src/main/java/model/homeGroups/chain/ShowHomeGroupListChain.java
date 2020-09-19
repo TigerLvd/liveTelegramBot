@@ -35,10 +35,10 @@ public class ShowHomeGroupListChain extends Chain {
             return result;
         }
 
-        int i = 1;
         for (HomeGroup group : groups) {
             StringBuilder groupsInfos = new StringBuilder();
-            groupsInfos.append(i++);
+            groupsInfos.append(" (");
+            groupsInfos.append(group.getId());
             groupsInfos.append(") ");
             if (null != group.getLieder() && (null != group.getLieder().getLastName() || null != group.getLieder().getFirstName())) {
                 groupsInfos.append("лидер: ");
