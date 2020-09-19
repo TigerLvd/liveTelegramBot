@@ -45,7 +45,9 @@ public class AllUsersEmptyStatInfoChain extends Chain {
                     StringBuilder stringBuilder = new StringBuilder();
                     stringBuilder.append("У пользователя ");
                     stringBuilder.append(user.getComment());
-                    stringBuilder.append(" нет информации за следующие недели:\n");
+                    stringBuilder.append(" нет информации за ");
+                    stringBuilder.append(lostWeeks.size());
+                    stringBuilder.append(" недели:\n");
                     result.add(stringBuilder.toString());
 
                     int i = 1;
