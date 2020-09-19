@@ -33,8 +33,9 @@ public class SendByChain extends Chain {
             return;
         }
 
-        int count = Integer.parseInt(strings[6]);
-        Date date = Utils.getDate(strings[3], strings[4], strings[5]);
+        int count = Integer.parseInt(strings[4]);
+        String[] dateSplit = strings[3].split("\\.");
+        Date date = Utils.getDate(dateSplit[0], dateSplit[1], dateSplit[2]);
 
         StatInfo statInfo = dbFacade.getStatInfoService().addNewOrUpdate(message.getChatId(), homeGroup, user.getComment(), date, count);
         botFacade.sendMsg(message.getChatId(), buildMessage(homeGroup, statInfo.getCount(), statInfo.getEventDate()), buildKeyboardForUser(user));
