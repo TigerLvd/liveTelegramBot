@@ -26,7 +26,6 @@ public class Main {
     private static String BOT_TOKEN2;
     private static String BOT_NAME3;
     private static String BOT_TOKEN3;
-    private static String AUTH_PSWRD;
 
     private static String PROXY_HOST;
     private static Integer PROXY_PORT;
@@ -88,7 +87,6 @@ public class Main {
 
             BOT_NAME = property.getProperty("bot_name");
             BOT_TOKEN = property.getProperty("bot_token");
-            AUTH_PSWRD = property.getProperty("auth_pswrd");
             BOT_NAME2 = property.getProperty("bot_name2");
             BOT_TOKEN2 = property.getProperty("bot_token2");
             BOT_NAME3 = property.getProperty("bot_name3");

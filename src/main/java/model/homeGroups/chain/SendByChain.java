@@ -1,5 +1,6 @@
 package model.homeGroups.chain;
 
+import model.homeGroups.db.HomeGroup;
 import model.homeGroups.db.StatInfo;
 import model.homeGroups.db.User;
 import model.homeGroups.facade.BotFacade;
@@ -25,20 +26,21 @@ public class SendByChain extends Chain {
         String text = message.getText().trim();
         String[] strings = text.trim().split("\\s\\s*");
         Long id = Long.parseLong(strings[2].trim());
-        User user = dbFacade.getUserService().findById(id);
-        if (Utils.isEmpty(user)) {
-            botFacade.sendMsg(message.getChatId(), "По указанному id пользователь не найден", buildKeyboardForUser((User) atr.get(USER_FIELD)));
+        HomeGroup homeGroup = dbFacade.getHomeGroupService().findById(id);
+        User user = (User) atr.get(USER_FIELD);
+        if (Utils.isEmpty(homeGroup)) {
+            botFacade.sendMsg(message.getChatId(), "По указанному id ячейка не найдена", buildKeyboardForUser(user));
             return;
         }
 
         int count = Integer.parseInt(strings[6]);
         Date date = Utils.getDate(strings[3], strings[4], strings[5]);
 
-        StatInfo statInfo = dbFacade.getStatInfoService().addNewOrUpdate(message.getChatId(), user, date, count);
-        botFacade.sendMsg(message.getChatId(), buildMessage(user, statInfo.getCount(), statInfo.getEventDate()), buildKeyboardForUser((User) atr.get(USER_FIELD)));
+        StatInfo statInfo = dbFacade.getStatInfoService().addNewOrUpdate(message.getChatId(), homeGroup, user.getComment(), date, count);
+        botFacade.sendMsg(message.getChatId(), buildMessage(homeGroup, statInfo.getCount(), statInfo.getEventDate()), buildKeyboardForUser(user));
     }
 
-    private String buildMessage(User user, Integer count, Date date) {
-        return "Внесены данные по пользователю " + user.getComment() + " за " + Utils.getStringOfDate(date) + " " + count + " человек.";
+    private String buildMessage(HomeGroup homeGroup, Integer count, Date date) {
+        return "Внесены данные по ячейке " + homeGroup.getComment() + " за " + Utils.getStringOfDate(date) + " " + count + " человек.";
     }
 }
