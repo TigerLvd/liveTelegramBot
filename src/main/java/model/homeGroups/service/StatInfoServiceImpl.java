@@ -77,26 +77,7 @@ public class StatInfoServiceImpl implements StatInfoService {
 
     @Override
     @Transactional
-    public StatInfo addNewOrUpdate(Long chatId, User user, Date eventDate, Integer count) {
-        StatInfo statInfo = findByDateAndHomeGroupId(eventDate, user.getHomeGroup().getId());
-        if (statInfo == null) {
-            statInfo = new StatInfo();
-        }
-        statInfo.setCount(count);
-        statInfo.setEventDate(eventDate);
-        statInfo.setSaveDate(new Timestamp(new Date().getTime()));
-        statInfo.setSaverId(chatId.intValue());
-        statInfo.setComment(user.getTelegramUserId().equals(chatId) ? user.getComment() : "root");
-        statInfo.setHomeGroup(user.getHomeGroup());
-
-        saveOrUpdate(statInfo);
-
-        return statInfo;
-    }
-
-    @Override
-    @Transactional
-    public StatInfo addNewOrUpdate(Long chatId, HomeGroup homeGroup, String sender, Date eventDate, Integer count) {
+    public StatInfo addNewOrUpdate(Long chatId, HomeGroup homeGroup, User sender, Date eventDate, Integer count) {
         StatInfo statInfo = findByDateAndHomeGroupId(eventDate, homeGroup.getId());
         if (statInfo == null) {
             statInfo = new StatInfo();
@@ -104,8 +85,8 @@ public class StatInfoServiceImpl implements StatInfoService {
         statInfo.setCount(count);
         statInfo.setEventDate(eventDate);
         statInfo.setSaveDate(new Timestamp(new Date().getTime()));
-        statInfo.setSaverId(chatId.intValue());
-        statInfo.setComment(sender);
+        statInfo.setSaverId(sender.getId().intValue());
+        statInfo.setComment(sender.getComment());
         statInfo.setHomeGroup(homeGroup);
 
         saveOrUpdate(statInfo);

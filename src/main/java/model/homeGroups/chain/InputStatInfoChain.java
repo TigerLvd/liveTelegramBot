@@ -42,7 +42,7 @@ public class InputStatInfoChain extends Chain {
             return;
         }
 
-        StatInfo statInfo = dbFacade.getStatInfoService().addNewOrUpdate(message.getChatId(), user, date, count);
+        StatInfo statInfo = dbFacade.getStatInfoService().addNewOrUpdate(message.getChatId(), user.getHomeGroup(), user, date, count);
 
         botFacade.sendMsg(message.getChatId(), "Получено: " + statInfo.getCount() + " за " + Utils.getStringOfDate(statInfo.getEventDate()), buildKeyboardForUser(user));
     }

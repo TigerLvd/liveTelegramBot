@@ -25,7 +25,5 @@ public interface StatInfoService {
 
     StatInfo findByDateAndHomeGroupId(Date date, Long id);
 
-    StatInfo addNewOrUpdate(Long chatId, User user, Date date, Integer count);
-
-    StatInfo addNewOrUpdate(Long chatId, HomeGroup homeGroup, String sender, Date date, Integer count);
+    StatInfo addNewOrUpdate(Long chatId, HomeGroup homeGroup, User sender, Date date, Integer count);
 }
