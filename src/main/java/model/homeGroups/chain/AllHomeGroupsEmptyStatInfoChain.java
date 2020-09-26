@@ -39,7 +39,7 @@ public class AllHomeGroupsEmptyStatInfoChain extends Chain {
             List<Date> lostWeeks = botFacade.getLostWeeks(dbFacade, homeGroup);
             if (Utils.isField(lostWeeks)) {
                 StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("У ячейки ");
+                stringBuilder.append("\nУ ячейки ");
                 stringBuilder.append(homeGroup.getComment());
                 stringBuilder.append(" нет информации за ");
                 stringBuilder.append(lostWeeks.size());
@@ -55,6 +55,12 @@ public class AllHomeGroupsEmptyStatInfoChain extends Chain {
                     builder.append("\n");
                     result.add(builder.toString());
                 }
+            } else {
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("\nУ ячейки ");
+                stringBuilder.append(homeGroup.getComment());
+                stringBuilder.append(" всё введено.\n");
+                result.add(stringBuilder.toString());
             }
         }
         return result;
