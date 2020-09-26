@@ -14,6 +14,7 @@ public class UserCommandChain extends Chain {
     static {
         chain = new InputStatInfoChain();
         chain.add(new ExampleInputStatInfoChain())
+                .add(new ShowHomeGroupListChain())
                 .add(new EmptyStatInfoChain())
                 .add(new EnteredStatInfoChain())
                 .add(new ShowAlertSettingsChain());
