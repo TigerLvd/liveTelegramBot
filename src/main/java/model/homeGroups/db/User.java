@@ -16,7 +16,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "USER", schema = "live_ntc")
-public class User {
+public class User implements HasComment, HasId {
 
     private Long id;
 

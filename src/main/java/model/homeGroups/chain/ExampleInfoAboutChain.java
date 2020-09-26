@@ -7,9 +7,11 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import utils.Utils;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class ExampleInfoAboutChain extends Chain {
     private final Pattern pattern = Pattern.compile("\\s*Инфа\\s\\s*по\\s*", Pattern.CASE_INSENSITIVE);
@@ -27,7 +29,15 @@ public class ExampleInfoAboutChain extends Chain {
         botFacade.sendMsg(message.getChatId(), "Инфа по " + user.getId(), buildKeyboardForUser(user));
         List<User> users = dbFacade.getUserService().findAll();
         if (Utils.isField(users)) {
-            botFacade.sendMsg(message.getChatId(), "Или выбирете пользователя:", buildInlineChooseUserKeyboard("info_about_", users));
+            botFacade.sendMsg(
+                    message.getChatId(),
+                    "Или выбирете пользователя:",
+                    buildInlineChooseUserKeyboard("info_about_",
+                            users.stream()
+                                    .sorted(Comparator.comparing(User::getComment))
+                                    .collect(Collectors.toList())
+                    )
+            );
         }
     }
 }

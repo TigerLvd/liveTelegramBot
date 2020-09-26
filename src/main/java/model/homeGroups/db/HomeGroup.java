@@ -9,7 +9,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "HOME_GROUP", schema = "live_ntc")
-public class HomeGroup {
+public class HomeGroup implements HasComment, HasId{
     public static final String LIEDER_FIELD = "lieder";
 
     private Long id;

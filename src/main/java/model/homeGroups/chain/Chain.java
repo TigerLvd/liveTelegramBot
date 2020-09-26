@@ -1,6 +1,8 @@
 package model.homeGroups.chain;
 
 import model.homeGroups.CustomKeyboardMarkup;
+import model.homeGroups.db.HasComment;
+import model.homeGroups.db.HasId;
 import model.homeGroups.db.User;
 import model.homeGroups.facade.BotFacade;
 import model.homeGroups.facade.DBFacade;
@@ -28,7 +30,6 @@ public abstract class Chain {
     protected final static String NEW_USERS_LIST_COMMAND = "Новые пользователи";
     protected final static String INFO_ABOUT_COMMAND = "Инфа по ";
     protected final static String EMPTY_HOME_GROUPS_STAT_INFO_COMMAND = "Не заполнено у ячеек";
-    protected final static String EMPTY_USERS_STAT_INFO_COMMAND = "Не заполнено у пользователей";
     protected final static String DOWNLOAD_STAT_INFOS = "Скачать статистику в xsl";
 
     private Chain next = null;
@@ -65,22 +66,21 @@ public abstract class Chain {
     }
 
     public static ReplyKeyboardMarkup buildKeyboardForUser(User user) {
-        Set<String> labels = new HashSet<>();
+        List<String> labels = new ArrayList<>();
         if (user.hasHomeGroup()) {
             labels.add(TO_INPUT_STAT_INFO_COMMAND);
             labels.add(EMPTY_STAT_INFO_COMMAND);
             labels.add(ENTERED_STAT_INFO_COMMAND);
-            labels.add(ALERT_SETTINGS_COMMAND);
             labels.add(HOME_GROUPS_LIST_COMMAND);
+            labels.add(ALERT_SETTINGS_COMMAND);
         }
         if (user.isAdmin()) {
+            labels.add(INPUT_STAT_INFO_BY_COMMAND);
+            labels.add(EMPTY_HOME_GROUPS_STAT_INFO_COMMAND);
             labels.add(USER_COMMAND);
             labels.add(NEW_USERS_LIST_COMMAND);
             labels.add(INFO_ABOUT_COMMAND);
-            labels.add(EMPTY_USERS_STAT_INFO_COMMAND);
-            labels.add(EMPTY_HOME_GROUPS_STAT_INFO_COMMAND);
-            labels.add(DOWNLOAD_STAT_INFOS);
-            labels.add(INPUT_STAT_INFO_BY_COMMAND);
+//            labels.add(DOWNLOAD_STAT_INFOS);
         }
         return Utils.isField(labels) ? new CustomKeyboardMarkup(labels) : null;
     }
@@ -108,17 +108,17 @@ public abstract class Chain {
         return markupInline;
     }
 
-    protected InlineKeyboardMarkup buildInlineChooseUserKeyboard(String prefix, List<User> users) {
+    protected <K extends HasComment & HasId> InlineKeyboardMarkup buildInlineChooseUserKeyboard(String prefix, List<K> holders) {
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
 
-        int size = users.size();
+        int size = holders.size();
         int i = 0;
         while (i < size) {
             List<InlineKeyboardButton> rowInline = new ArrayList<>();
-            addRowInline(prefix, users.get(i++), rowInline);
+            addRowInline(prefix, holders.get(i++), rowInline);
             if (i < size) {
-                addRowInline(prefix, users.get(i++), rowInline);
+                addRowInline(prefix, holders.get(i++), rowInline);
             }
 
             rowsInline.add(rowInline);
@@ -128,10 +128,10 @@ public abstract class Chain {
         return markupInline;
     }
 
-    protected void addRowInline(String prefix, User user, List<InlineKeyboardButton> rowInline) {
+    protected <K extends HasComment & HasId> void addRowInline(String prefix, K holder, List<InlineKeyboardButton> rowInline) {
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-        inlineKeyboardButton.setText(user.getComment());
-        inlineKeyboardButton.setCallbackData(prefix + user.getId());
+        inlineKeyboardButton.setText(holder.getComment());
+        inlineKeyboardButton.setCallbackData(prefix + holder.getId());
         rowInline.add(inlineKeyboardButton);
     }
 }
