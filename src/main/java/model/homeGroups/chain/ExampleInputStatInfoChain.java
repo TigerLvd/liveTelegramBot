@@ -22,7 +22,7 @@ public class ExampleInputStatInfoChain extends Chain {
     @Override
     public void doJob(DBFacade dbFacade, BotFacade botFacade, Message message, CallbackQuery callbackQuery, Map<String, Object> atr) {
         String msg = "Введите информацию в формате: Статистика: дд.мм.гг количество.";
-        String msg2 = "Обратите внимание, что слово \"<b>Статистика</b>\" должна быть в отправляемом сообщении!\n\n" +
+        String msg2 = "Обратите внимание, что слово \"Статистика\" должна быть в отправляемом сообщении!\n\n" +
                 "Для удобства можно скопировать и изменить пример:";
         String msg3 = "Статистика: " + Utils.getStringOfDate(new Date()) + " 5";
 
