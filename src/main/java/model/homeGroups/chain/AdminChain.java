@@ -24,7 +24,8 @@ public class AdminChain extends Chain {
                 .add(new ExampleInputStatInfoChain())
                 .add(new EmptyStatInfoChain())
                 .add(new EnteredStatInfoChain())
-                .add(new ShowAlertSettingsChain());
+                .add(new ShowAlertSettingsChain())
+                .add(new InvalidInputChain());
     }
 
     @Override

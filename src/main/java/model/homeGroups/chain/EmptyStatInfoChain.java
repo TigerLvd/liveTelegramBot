@@ -1,18 +1,17 @@
 package model.homeGroups.chain;
 
+import model.homeGroups.db.User;
+import model.homeGroups.facade.BotFacade;
+import model.homeGroups.facade.DBFacade;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-
-import model.homeGroups.db.User;
-import model.homeGroups.facade.BotFacade;
-import model.homeGroups.facade.DBFacade;
-import utils.Utils;
 
 public class EmptyStatInfoChain extends Chain {
     private final Pattern pattern = Pattern.compile("\\s*Не\\s\\s*заполнено\\s*", Pattern.CASE_INSENSITIVE);
@@ -30,6 +29,7 @@ public class EmptyStatInfoChain extends Chain {
                 buildMessage(dbFacade, botFacade, user),
                 buildKeyboardForUser((User) atr.get(USER_FIELD)));
     }
+
     private List<String> buildMessage(DBFacade dbFacade, BotFacade botFacade, User user) {
         List<String> result = new ArrayList<>();
         if (!user.hasHomeGroup()) {
@@ -54,6 +54,8 @@ public class EmptyStatInfoChain extends Chain {
                 builder.append("\n");
                 result.add(builder.toString());
             }
+        } else {
+            result.add("Всё заполнено.");
         }
         return result;
     }
