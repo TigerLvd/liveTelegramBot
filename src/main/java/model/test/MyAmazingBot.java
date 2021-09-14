@@ -1,7 +1,7 @@
 package model.test;
 
-import model.homeGroups.CustomKeyboardMarkup;
-import model.homeGroups.db.User;
+import model.homegroups.CustomKeyboardMarkup;
+import model.homegroups.db.User;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -64,8 +64,8 @@ public class MyAmazingBot extends TelegramLongPollingBot {
                         .setChatId(chatId)
                         .setText("You send /start");
                 InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-                List<List<InlineKeyboardButton>> rowsInline = new ArrayList<List<InlineKeyboardButton>>();
-                List<InlineKeyboardButton> rowInline = new ArrayList<InlineKeyboardButton>();
+                List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+                List<InlineKeyboardButton> rowInline = new ArrayList<>();
                 rowInline.add(new InlineKeyboardButton().setText("Update message text").setCallbackData("update_msg_text"));
                 // Set the keyboard to the markup
                 rowsInline.add(rowInline);
@@ -81,26 +81,15 @@ public class MyAmazingBot extends TelegramLongPollingBot {
         } else if (update.hasCallbackQuery()) {
 //            // Set variables
             String call_data = update.getCallbackQuery().getData();
-//            Integer message_id = update.getCallbackQuery().getMessage().getMessageId();
             long chat_id = update.getCallbackQuery().getMessage().getChatId();
 //
             if (call_data.equals("update_msg_text")) {
-//                String answer = "Updated message text";
-//                EditMessageText new_message = new EditMessageText()
-//                        .setChatId(chat_id)
-//                        .setMessageId(message_id)
-//                        .setText(answer);
-//                try {
-//                    execute(new_message);
-//                } catch (TelegramApiException e) {
-//                    e.printStackTrace();
-//                }
                 SendMessage message = new SendMessage() // Create a message object object
                         .setChatId(chat_id)
                         .setText("Change the message!");
                 InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-                List<List<InlineKeyboardButton>> rowsInline = new ArrayList<List<InlineKeyboardButton>>();
-                List<InlineKeyboardButton> rowInline = new ArrayList<InlineKeyboardButton>();
+                List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+                List<InlineKeyboardButton> rowInline = new ArrayList<>();
                 rowInline.add(new InlineKeyboardButton().setText("Update message text2").setCallbackData("update_msg_text2"));
                 // Set the keyboard to the markup
                 rowsInline.add(rowInline);

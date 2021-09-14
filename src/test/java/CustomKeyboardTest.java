@@ -1,5 +1,4 @@
-import model.homeGroups.CustomKeyboardMarkup;
-import org.junit.Ignore;
+import model.homegroups.CustomKeyboardMarkup;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -9,6 +8,7 @@ public class CustomKeyboardTest {
     @Test
     public void zeroInput() {
         CustomKeyboardMarkup keyboard = new CustomKeyboardMarkup();
+        assertEquals(0, keyboard.getKeyboard().size());
     }
 
     @Test

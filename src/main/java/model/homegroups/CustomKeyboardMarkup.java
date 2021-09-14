@@ -1,4 +1,4 @@
-package model;
+package model.homegroups;
 
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -9,17 +9,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CustomKeyboardMarkup extends ReplyKeyboardMarkup {
-    private static final Long ROWS_SIZE = 2L;
+    public static final Long ROWS_SIZE = 2L;
 
     public CustomKeyboardMarkup(String... keyNames) {
-        this(Arrays.stream(keyNames).collect(Collectors.toList()), ROWS_SIZE);
+        this(Arrays.stream(keyNames).collect(Collectors.toList()));
     }
 
-    public CustomKeyboardMarkup(List<String> keyNames, Long columnCount) {
+    public CustomKeyboardMarkup(List<String> keyNames) {
         List<KeyboardRow> keyboard = new ArrayList<>();
         KeyboardRow row = new KeyboardRow();
         for (String keyName : keyNames) {
-            if (row.size() == columnCount) {
+            if (row.size() == ROWS_SIZE) {
                 keyboard.add(row);
                 row = new KeyboardRow();
             }

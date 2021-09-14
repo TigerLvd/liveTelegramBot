@@ -1,8 +1,10 @@
 package controllers;
 
-import model.homeGroups.facade.BotFacade;
-import model.homeGroups.facade.DBFacade;
+import model.homegroups.facade.BotFacade;
+import model.homegroups.facade.DBFacade;
 import model.liveInfo.services.FieldService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.telegram.telegrambots.ApiContextInitializer;
@@ -15,23 +17,25 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-import model.homeGroups.HomeGroupBot;
+import model.homegroups.HomeGroupBot;
 import model.liveInfo.LiveInfoBot;
 import model.liveInfoAdmin.LiveInfoAdminBot;
 
 public class Main {
-    private static String BOT_NAME;
-    private static String BOT_TOKEN;
-    private static String BOT_NAME2;
-    private static String BOT_TOKEN2;
-    private static String BOT_NAME3;
-    private static String BOT_TOKEN3;
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
 
-    private static String PROXY_HOST;
-    private static Integer PROXY_PORT;
+    private static String botName;
+    private static String botToken;
+    private static String botName2;
+    private static String botToken2;
+    private static String botName3;
+    private static String botToken3;
 
-    private static Long ADMIN_ID;
-    private final static Boolean USE_PROXY = false;
+    private static String proxyHost;
+    private static Integer proxyPort;
+
+    private static Long adminId;
+    private static final Boolean USE_PROXY = false;
 
     public static void main(String[] args) {
 
@@ -54,18 +58,18 @@ public class Main {
 
             if (Boolean.TRUE.equals(USE_PROXY)) {
                 // use PROXY
-                botOptions.setProxyHost(PROXY_HOST);
-                botOptions.setProxyPort(PROXY_PORT);
+                botOptions.setProxyHost(proxyHost);
+                botOptions.setProxyPort(proxyPort);
                 botOptions.setProxyType(DefaultBotOptions.ProxyType.SOCKS5);
 
-                bot = new HomeGroupBot(BOT_TOKEN, BOT_NAME, ADMIN_ID, botOptions, botFacade, dbFacade);
-                bot2 = new LiveInfoBot(BOT_TOKEN2, BOT_NAME2, botOptions, fieldService);
-                bot3 = new LiveInfoAdminBot(BOT_TOKEN3, BOT_NAME3, botOptions, fieldService, ADMIN_ID);
+                bot = new HomeGroupBot(botToken, botName, adminId, botOptions, botFacade, dbFacade);
+                bot2 = new LiveInfoBot(botToken2, botName2, botOptions, fieldService);
+                bot3 = new LiveInfoAdminBot(botToken3, botName3, botOptions, fieldService, adminId);
             } else {
                 // use VPN
-                bot = new HomeGroupBot(BOT_TOKEN, BOT_NAME, ADMIN_ID, botFacade, dbFacade);
-                bot2 = new LiveInfoBot(BOT_TOKEN2, BOT_NAME2, fieldService);
-                bot3 = new LiveInfoAdminBot(BOT_TOKEN3, BOT_NAME3, fieldService, ADMIN_ID);
+                bot = new HomeGroupBot(botToken, botName, adminId, botFacade, dbFacade);
+                bot2 = new LiveInfoBot(botToken2, botName2, fieldService);
+                bot3 = new LiveInfoAdminBot(botToken3, botName3, fieldService, adminId);
             }
 
             botsApi.registerBot(bot);
@@ -74,37 +78,33 @@ public class Main {
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
-        System.out.println("STARTED!!!");
+        log.info("STARTED!!!");
     }
 
     private static void init() {
-        FileInputStream fis;
         Properties property = new Properties();
-
-        try {
-            fis = new FileInputStream("src/main/resources/config.properties");
+        try (FileInputStream fis = new FileInputStream("src/main/resources/config.properties")) {
             property.load(fis);
 
-            BOT_NAME = property.getProperty("bot_name");
-            BOT_TOKEN = property.getProperty("bot_token");
-            BOT_NAME2 = property.getProperty("bot_name2");
-            BOT_TOKEN2 = property.getProperty("bot_token2");
-            BOT_NAME3 = property.getProperty("bot_name3");
-            BOT_TOKEN3 = property.getProperty("bot_token3");
+            botName = property.getProperty("bot_name");
+            botToken = property.getProperty("bot_token");
+            botName2 = property.getProperty("bot_name2");
+            botToken2 = property.getProperty("bot_token2");
+            botName3 = property.getProperty("bot_name3");
+            botToken3 = property.getProperty("bot_token3");
 
-            PROXY_HOST = property.getProperty("proxy_host");
-            PROXY_PORT = Integer.valueOf(property.getProperty("proxy_port"));
+            proxyHost = property.getProperty("proxy_host");
+            proxyPort = Integer.valueOf(property.getProperty("proxy_port"));
 
-            ADMIN_ID = Long.valueOf(property.getProperty("admin_id"));
+            adminId = Long.valueOf(property.getProperty("admin_id"));
 
-            System.out.println("BOT_NAME: " + BOT_NAME
-                    + ", BOT_NAME2: " + BOT_NAME2
-                    + ", BOT_NAME3: " + BOT_NAME3
-                    + ", PROXY_HOST: " + PROXY_HOST
-                    + ", PROXY_PORT: " + PROXY_PORT);
-
+            log.info("BOT_NAME: " + botName
+                    + ", BOT_NAME2: " + botName2
+                    + ", BOT_NAME3: " + botName3
+                    + ", PROXY_HOST: " + proxyHost
+                    + ", PROXY_PORT: " + proxyPort);
         } catch (IOException e) {
-            System.err.println("ОШИБКА: Файл свойств отсуствует!");
+            log.error("ОШИБКА: Файл свойств отсутствует!");
         }
     }
 }

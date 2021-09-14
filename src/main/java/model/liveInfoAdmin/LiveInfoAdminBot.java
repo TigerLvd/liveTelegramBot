@@ -1,37 +1,24 @@
 package model.liveInfoAdmin;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
+import model.CustomKeyboardMarkup;
+import model.liveInfo.db.Field;
+import model.liveInfo.services.FieldService;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendLocation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import model.CustomKeyboardMarkup;
-import model.liveInfo.db.Field;
-import model.liveInfo.services.FieldService;
 
 public class LiveInfoAdminBot extends TelegramLongPollingBot {
 
-    private Long adminId;
-    private String botToken;
-    private String botName;
+    private final Long adminId;
+    private final String botToken;
+    private final String botName;
 
-    private FieldService fieldService;
+    private final FieldService fieldService;
 
     public LiveInfoAdminBot(String botToken, String botName, DefaultBotOptions options, FieldService fieldService, Long adminId) {
         super(options);
@@ -225,17 +212,6 @@ public class LiveInfoAdminBot extends TelegramLongPollingBot {
                 "PhotoPath=<" + field.getPhotoPath() + ">\n" +
                 "ColumnCount=" + field.getColumnCount() + "\n" +
                 "isShowBrothers=" + field.isShowBrothers();
-    }
-
-    private void sendStartTestMessage(Long chatId) {
-        SendMessage message = new SendMessage()
-                .setChatId(chatId)
-                .setText("Ты кто такой?!");
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override

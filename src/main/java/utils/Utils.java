@@ -1,25 +1,11 @@
 package utils;
 
-import org.apache.commons.codec.binary.Base64;
-
 import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Utils {
-    public static String base64Encode(String str) {
-        if (null == str) {
-            return null;
-        }
-        return Base64.encodeBase64String(str.getBytes());
-    }
-
-    public static String base64Decode(String str) {
-        if (null == str) {
-            return null;
-        }
-
-        return new String(Base64.decodeBase64(str));
+    private Utils() {
     }
 
     public static boolean isField(Object object) {

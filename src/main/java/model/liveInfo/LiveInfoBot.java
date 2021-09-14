@@ -142,17 +142,6 @@ public class LiveInfoBot extends TelegramLongPollingBot {
         }
     }
 
-    private void sendStartTestMessage(Long chatId, String text) {
-        SendMessage message = new SendMessage()
-                .setChatId(chatId)
-                .setText("Привет! Это чат бот и он пока на этапе тестирования!");
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-
     @Override
     public String getBotUsername() {
         return botName;

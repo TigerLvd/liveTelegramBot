@@ -17,9 +17,9 @@
         <property name="configLocation" value="classpath:hibernate.cfg.xml" />
         <property name="packagesToScan">
             <list>
-                <value>model.homeGroups.db</value>
-                <value>model.homeGroups.dao</value>
-                <value>model.homeGroups.service</value>
+                <value>model.homegroups.db</value>
+                <value>model.homegroups.dao</value>
+                <value>model.homegroups.service</value>
             </list>
         </property>
     </bean>
@@ -40,34 +40,34 @@
     <bean id="persistenceExceptionTranslationPostProcessor"
           class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/>
 
-    <bean id="StatInfo" class="model.homeGroups.db.StatInfo" />
+    <bean id="StatInfo" class="model.homegroups.db.StatInfo" />
 
-    <bean id="User" class="model.homeGroups.db.User" />
+    <bean id="User" class="model.homegroups.db.User" />
 
-    <bean id="HomeGroup" class="model.homeGroups.db.HomeGroup" />
+    <bean id="HomeGroup" class="model.homegroups.db.HomeGroup" />
 
-    <bean id="StatInfoService" class="model.homeGroups.service.StatInfoServiceImpl">
+    <bean id="StatInfoService" class="model.homegroups.service.StatInfoServiceImpl">
         <property name="dao" ref="StatInfoDaoService"/>
     </bean>
 
-    <bean id="UserService" class="model.homeGroups.service.UserServiceImpl">
+    <bean id="UserService" class="model.homegroups.service.UserServiceImpl">
         <property name="dao" ref="UserDaoService"/>
     </bean>
 
-    <bean id="HomeGroupService" class="model.homeGroups.service.HomeGroupServiceImpl">
+    <bean id="HomeGroupService" class="model.homegroups.service.HomeGroupServiceImpl">
         <property name="dao" ref="HomeGroupDaoService"/>
     </bean>
 
-    <bean id="StatInfoDaoService" class="model.homeGroups.dao.StatInfoDaoServiceImpl" parent="AbstractHibernateDao">
-        <property name="persistentClass" value="model.homeGroups.db.StatInfo"/>
+    <bean id="StatInfoDaoService" class="model.homegroups.dao.StatInfoDaoServiceImpl" parent="AbstractHibernateDao">
+        <property name="persistentClass" value="model.homegroups.db.StatInfo"/>
     </bean>
 
-    <bean id="UserDaoService" class="model.homeGroups.dao.UserDaoServiceImpl" parent="AbstractHibernateDao">
-        <property name="persistentClass" value="model.homeGroups.db.User"/>
+    <bean id="UserDaoService" class="model.homegroups.dao.UserDaoServiceImpl" parent="AbstractHibernateDao">
+        <property name="persistentClass" value="model.homegroups.db.User"/>
     </bean>
 
-    <bean id="HomeGroupDaoService" class="model.homeGroups.dao.HomeGroupDaoServiceImpl" parent="AbstractHibernateDao">
-        <property name="persistentClass" value="model.homeGroups.db.HomeGroup"/>
+    <bean id="HomeGroupDaoService" class="model.homegroups.dao.HomeGroupDaoServiceImpl" parent="AbstractHibernateDao">
+        <property name="persistentClass" value="model.homegroups.db.HomeGroup"/>
     </bean>
 
     <bean id="Field" class="model.liveInfo.db.Field" />
@@ -80,18 +80,18 @@
         <property name="persistentClass" value="model.liveInfo.db.Field"/>
     </bean>
 
-    <bean id="schedulerFacade" class="model.homeGroups.facade.SchedulerFacade">
+    <bean id="schedulerFacade" class="model.homegroups.facade.SchedulerFacade">
         <property name="dbFacade" ref="dbFacade"/>
         <property name="botFacade" ref="botFacade"/>
     </bean>
 
-    <bean id="dbFacade" class="model.homeGroups.facade.DBFacade">
+    <bean id="dbFacade" class="model.homegroups.facade.DBFacade">
         <property name="userService" ref="UserService"/>
         <property name="homeGroupService" ref="HomeGroupService"/>
         <property name="statInfoService" ref="StatInfoService"/>
     </bean>
 
-    <bean id="botFacade" class="model.homeGroups.facade.BotFacade"/>
+    <bean id="botFacade" class="model.homegroups.facade.BotFacade"/>
 
     <task:scheduled-tasks scheduler="printingScheduler">
         <task:scheduled ref="schedulerFacade" method="checkLostStatInfos" cron="0 0 11 * * 3"/>

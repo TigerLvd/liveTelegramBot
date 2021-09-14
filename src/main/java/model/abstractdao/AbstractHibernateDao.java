@@ -5,7 +5,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
-import org.springframework.util.CollectionUtils;
+import utils.Utils;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import java.util.Collection;
@@ -16,9 +16,6 @@ public abstract class AbstractHibernateDao<T> implements Dao<T> {
     private SessionFactory sessionFactory;
 
     private Class<T> persistentClass;
-
-    public AbstractHibernateDao() {
-    }
 
     protected CriteriaBuilder getCriteriaBuilder() {
         return getSession().getCriteriaBuilder();
@@ -54,11 +51,11 @@ public abstract class AbstractHibernateDao<T> implements Dao<T> {
 
     @Override
     public void saveOrUpdate(Collection<T> entities) {
-        if(CollectionUtils.isEmpty(entities)){
+        if (Utils.isEmpty(entities)) {
             return;
         }
 
-        for(T entity : entities){
+        for (T entity : entities) {
             getSession().saveOrUpdate(entity);
         }
     }
@@ -71,9 +68,7 @@ public abstract class AbstractHibernateDao<T> implements Dao<T> {
     @Override
     @SuppressWarnings("unchecked")
     public T findById(Long id) {
-        T t = (T) getSession().get(getPersistentClass(), id);
-        //todo инициализация
-        return t;
+        return (T) getSession().get(getPersistentClass(), id); //todo добавить инициализацию
     }
 
     @Override

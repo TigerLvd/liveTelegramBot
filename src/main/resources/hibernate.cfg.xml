@@ -7,11 +7,10 @@
     <property name="show_sql">true</property>
 
     <!-- DB schema will be updated if needed -->
-    <!-- <property name="hibernate.hbm2ddl.auto">update</property> -->
 
-    <mapping class="model.homeGroups.db.StatInfo"/>
-    <mapping class="model.homeGroups.db.User"/>
-    <mapping class="model.homeGroups.db.HomeGroup"/>
+    <mapping class="model.homegroups.db.StatInfo"/>
+    <mapping class="model.homegroups.db.User"/>
+    <mapping class="model.homegroups.db.HomeGroup"/>
     <mapping class="model.liveInfo.db.Field"/>
   </session-factory>
 </hibernate-configuration>
